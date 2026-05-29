@@ -1,5 +1,7 @@
 # Heladería Conejito - Sistema Web
-
+<p align="center">
+  <img src="assets/banner.png" width="900"/>
+</p>
 ## Descripción del Proyecto
 
 Heladería Conejito es un sistema web desarrollado para optimizar la experiencia de compra de los clientes de una heladería familiar. El proyecto busca reducir tiempos de espera, mejorar la organización de pedidos y facilitar la visualización de productos mediante herramientas digitales.
