@@ -29,7 +29,7 @@ El sistema contará con:
 * Java Spring Boot
 * Spring Web
 * Spring Data JPA
-* MySQL
+* PostgreSQL
 * Lombok
 
 ## Base de Datos
