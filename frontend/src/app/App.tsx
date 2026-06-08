@@ -1,3 +1,4 @@
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import WhatToFind from "./components/WhatToFind";
@@ -7,10 +8,13 @@ import Loyalty from "./components/Loyalty";
 import Social from "./components/Social";
 import Testimonials from "./components/Testimonials";
 import Footer from "./components/Footer";
+import AdminDashboard from "../pages/AdminDashboard";
 
-export default function App() {
+function LandingPage() {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       <Navbar />
       <main className="pt-20">
         <Hero />
@@ -22,6 +26,23 @@ export default function App() {
         <Social />
       </main>
       <Footer />
+
+      <button
+        onClick={() => navigate("/admin")}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 transition-colors z-50 border border-gray-200"
+        title="Panel de Administración"
+      >
+        🔒
+      </button>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+    </Routes>
   );
 }
