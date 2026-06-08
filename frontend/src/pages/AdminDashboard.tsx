@@ -5,79 +5,79 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa] font-[Inter]">
-      <aside className="w-64 bg-white border-r border-gray-100 flex flex-col fixed inset-y-0 left-0 z-50">
-        <div className="p-6 flex items-center space-x-3">
-          <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-            <span className="text-orange-500 text-xl">🍦</span>
+      <style>{`
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          font-family: 'Material Symbols Outlined';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          word-wrap: normal;
+          direction: ltr;
+          -webkit-font-smoothing: antialiased;
+        }
+      `}</style>
+      <aside className="w-64 bg-white border-r border-[#e1e3e4] flex flex-col fixed inset-y-0 left-0 z-50 py-6 px-4">
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
+            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
           </div>
           <div>
-            <h1 className="font-bold text-gray-800 leading-tight">Admin Panel</h1>
-            <p className="text-xs text-gray-400">Heladería Ica</p>
+            <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
+            <p className="text-xs text-[#564245]">Heladería Ica</p>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 mt-4 space-y-2">
-          <a
-            className="flex items-center px-4 py-3 rounded-2xl transition-colors"
-            style={{
-              background: "linear-gradient(90deg, #ff80a0 0%, #ff80a0 100%)",
-              color: "white",
-            }}
-            href="#"
+        <nav className="flex-1 space-y-2 mt-10 px-2">
+          <button
+            onClick={() => navigate("/admin")}
+            className="w-full flex items-center gap-3 px-4 py-3 bg-[#ff7e9d] text-[#761235] font-bold rounded-xl shadow-sm text-[14px] leading-[20px]"
           >
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-medium">Dashboard</span>
-          </a>
-          <a className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-2xl transition-colors" href="#">
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-medium">Productos</span>
-          </a>
-          <a className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-2xl transition-colors" href="#">
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-medium">Pedidos</span>
-          </a>
-          <a className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-2xl transition-colors" href="#">
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 4.354a4 4 0 110 5.292M15.21 17.166M8.79 17.166M11.369 11.37a4 4 0 11.453-.454M15.823 15.123a6 6 0 010 3.123M8.177 15.123a6 6 0 000 3.123" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-medium">Clientes</span>
-          </a>
-          <a className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-2xl transition-colors" href="#">
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span className="font-medium">Configuración</span>
-          </a>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+            Dashboard
+          </button>
+          <button
+            onClick={() => navigate("/admin/productos")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#564245] hover:bg-[#f3f4f5] transition-colors rounded-xl text-[14px] leading-[20px]"
+          >
+            <span className="material-symbols-outlined">icecream</span>
+            Productos
+          </button>
+          <button
+            onClick={() => navigate("/admin/pedidos")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#564245] hover:bg-[#f3f4f5] transition-colors rounded-xl text-[14px] leading-[20px]"
+          >
+            <span className="material-symbols-outlined">shopping_cart</span>
+            Pedidos
+          </button>
+          <button
+            onClick={() => navigate("/admin/clientes")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#564245] hover:bg-[#f3f4f5] transition-colors rounded-xl text-[14px] leading-[20px]"
+          >
+            <span className="material-symbols-outlined">group</span>
+            Clientes
+          </button>
+          <button
+            onClick={() => navigate("/admin/configuracion")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#564245] hover:bg-[#f3f4f5] transition-colors rounded-xl text-[14px] leading-[20px]"
+          >
+            <span className="material-symbols-outlined">settings</span>
+            Configuración
+          </button>
         </nav>
 
-        <div className="p-6 border-t border-gray-100">
+        <div className="mt-auto border-t border-[#e1e3e4] pt-4 px-2">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center text-red-500 font-semibold hover:opacity-80 transition-opacity"
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#ba1a1a] hover:bg-[#ffdad6]/10 transition-colors rounded-xl text-[14px] leading-[20px]"
           >
-            <span className="mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-              </svg>
-            </span>
-            <span>Cerrar Sesión</span>
+            <span className="material-symbols-outlined">logout</span>
+            Cerrar Sesión
           </button>
         </div>
       </aside>
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="bg-white p-6 rounded-3xl shadow-md">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 bg-pink-200/20 rounded-2xl flex items-center justify-center text-pink-400 text-xl font-bold">
+              <div className="w-12 h-12 bg-pink-200/20 rounded-2xl flex items-center justify-center text-[#a43756] text-xl font-black">
                 $
               </div>
               <div className="flex items-center text-green-500 text-sm font-semibold">
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
                 +12.5%
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-800">S/ 2,450</p>
+            <p className="text-3xl font-black text-gray-800">S/ 2,450</p>
             <p className="text-gray-400 text-sm mt-1">Ventas Hoy</p>
           </div>
 
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
                 +5
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-800">18</p>
+            <p className="text-3xl font-black text-gray-800">18</p>
             <p className="text-gray-400 text-sm mt-1">Pedidos Activos</p>
           </div>
 
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                 +8.2%
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-800">24</p>
+            <p className="text-3xl font-black text-gray-800">24</p>
             <p className="text-gray-400 text-sm mt-1">Clientes Nuevos</p>
           </div>
 
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
                 0.2
               </div>
             </div>
-            <p className="text-3xl font-bold text-gray-800">4.9</p>
+            <p className="text-3xl font-black text-gray-800">4.9</p>
             <p className="text-gray-400 text-sm mt-1">Calificación</p>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
           <div className="lg:col-span-2 bg-white p-8 rounded-[40px] shadow-md">
             <div className="flex justify-between items-center mb-6">
               <h4 className="text-xl font-bold text-gray-800">Pedidos Recientes</h4>
-              <a className="text-pink-400 font-semibold text-sm hover:underline" href="#">
+              <a className="text-[#a43756] font-bold text-sm hover:underline" href="#">
                 Ver todos
               </a>
             </div>
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right flex items-center space-x-6">
                   <div>
-                    <p className="font-bold text-gray-800">S/ 42.00</p>
+                    <p className="font-black text-gray-900 text-[16px]">S/ 42.00</p>
                     <p className="text-[10px] text-gray-400 flex items-center justify-end">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right flex items-center space-x-6">
                   <div>
-                    <p className="font-bold text-gray-800">S/ 15.00</p>
+                    <p className="font-black text-gray-900 text-[16px]">S/ 15.00</p>
                     <p className="text-[10px] text-gray-400 flex items-center justify-end">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right flex items-center space-x-6">
                   <div>
-                    <p className="font-bold text-gray-800">S/ 45.00</p>
+                    <p className="font-black text-gray-900 text-[16px]">S/ 45.00</p>
                     <p className="text-[10px] text-gray-400 flex items-center justify-end">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
                   <p className="font-bold text-gray-700">Cono Triple Arcoíris</p>
                   <div className="text-right">
                     <span className="text-xs text-gray-400 block">45 vendidos</span>
-                    <span className="text-pink-400 font-bold text-sm">S/ 540</span>
+                    <span className="text-[#a43756] font-black text-sm">S/ 540</span>
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
                   <p className="font-bold text-gray-700">Pizza Personal</p>
                   <div className="text-right">
                     <span className="text-xs text-gray-400 block">32 vendidos</span>
-                    <span className="text-pink-400 font-bold text-sm">S/ 576</span>
+                    <span className="text-[#a43756] font-black text-sm">S/ 576</span>
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                   <p className="font-bold text-gray-700">Milkshake de Fresa</p>
                   <div className="text-right">
                     <span className="text-xs text-gray-400 block">28 vendidos</span>
-                    <span className="text-pink-400 font-bold text-sm">S/ 420</span>
+                    <span className="text-[#a43756] font-black text-sm">S/ 420</span>
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">

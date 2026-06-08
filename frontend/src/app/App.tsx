@@ -9,6 +9,10 @@ import Social from "./components/Social";
 import Testimonials from "./components/Testimonials";
 import Footer from "./components/Footer";
 import AdminDashboard from "../pages/AdminDashboard";
+import AdminProducts from "../pages/AdminProducts";
+import AdminOrders from "../pages/AdminOrders";
+import AdminClientes from "../pages/AdminClientes";
+import AdminConfiguracion from "../pages/AdminConfiguracion";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -43,6 +47,10 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/productos" element={<AdminProducts />} />
+      <Route path="/admin/pedidos" element={<AdminOrders />} />
+      <Route path="/admin/clientes" element={<AdminClientes />} />
+      <Route path="/admin/configuracion" element={<AdminConfiguracion />} />
     </Routes>
   );
 }
