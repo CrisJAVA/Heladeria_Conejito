@@ -1,13 +1,15 @@
 import { motion } from "motion/react";
 import { IceCream, Menu, X, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Inicio", href: "#inicio" },
-    { name: "Menú", href: "#menu" },
+    { name: "Menú", href: "/menu" },
     { name: "Promociones", href: "#promociones" },
     { name: "Fidelización", href: "#fidelizacion" },
     { name: "Contacto", href: "#contacto" },
@@ -38,14 +40,14 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.name}
-                href={link.href}
+                onClick={() => navigate(link.href)}
                 className="text-gray-700 hover:text-[#ff6b9d] font-medium transition-colors relative group"
               >
                 {link.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#ff6b9d] to-[#ffd93d] group-hover:w-full transition-all" />
-              </a>
+              </button>
             ))}
           </div>
 
@@ -84,14 +86,13 @@ export default function Navbar() {
           >
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
-                <a
+                <button
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-gray-700 hover:text-[#ff6b9d] font-medium transition-colors py-2"
+                  onClick={() => { navigate(link.href); setIsOpen(false); }}
+                  className="text-gray-700 hover:text-[#ff6b9d] font-medium transition-colors py-2 text-left"
                 >
                   {link.name}
-                </a>
+                </button>
               ))}
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4">
                 <ShoppingBag className="w-5 h-5" />
