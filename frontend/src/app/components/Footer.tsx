@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { IceCream, MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle } from "lucide-react";
 
 export default function Footer() {
@@ -99,15 +100,15 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-6">Enlaces Rápidos</h3>
             <div className="space-y-3">
-              <a href="#" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
+              <Link to="/menu" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
                 Menú Completo
-              </a>
-              <a href="#" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
+              </Link>
+              <Link to="/promociones" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
                 Promociones
-              </a>
-              <a href="#" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
+              </Link>
+              <Link to="/fidelizacion" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
                 Programa de Fidelización
-              </a>
+              </Link>
               <a href="#" className="block text-gray-400 hover:text-[#ff6b9d] transition-colors">
                 Trabaja con Nosotros
               </a>

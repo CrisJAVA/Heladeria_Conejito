@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IceCream, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import Footer from "../app/components/Footer";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -112,6 +113,7 @@ export default function LoginPage() {
           </form>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../app/components/Navbar";
+import Footer from "../app/components/Footer";
+import { useCart } from "../context/CartContext";
 
 const categories = ["Helados", "Milkshakes", "Pizzas", "Combos", "Postres"];
 
@@ -81,6 +84,8 @@ const products = [
 const allCategories = ["Todas las categorías", ...categories];
 
 export default function MenuPage() {
+  const navigate = useNavigate();
+  const { addToCart, totalItems } = useCart();
   const [selectedCategory, setSelectedCategory] = useState("Helados");
   const [filterCategory, setFilterCategory] = useState("Todas las categorías");
   const [searchTerm, setSearchTerm] = useState("");
@@ -239,7 +244,10 @@ export default function MenuPage() {
                     </div>
                     <p className="text-sm text-[#6b7280] line-clamp-2">{product.description}</p>
                     {product.available ? (
-                      <button className="w-full py-2.5 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white font-medium text-sm rounded-xl hover:shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+                      <button
+                        onClick={() => addToCart({ name: product.name, price: product.price, image: product.image, description: product.description })}
+                        className="w-full py-2.5 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white font-medium text-sm rounded-xl hover:shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                         </svg>
@@ -297,7 +305,10 @@ export default function MenuPage() {
                   <h4 className="font-semibold text-sm text-[#2d2d2d] truncate">{item.name}</h4>
                   <p className="text-[#ff6b9d] font-bold text-sm mt-0.5">S/.{item.price.toFixed(2)}</p>
                 </div>
-                <button className="px-3 py-1.5 bg-[#ff6b9d]/10 text-[#ff6b9d] font-medium text-xs rounded-lg hover:bg-[#ff6b9d] hover:text-white transition-all whitespace-nowrap">
+                <button
+                  onClick={() => addToCart({ name: item.name, price: item.price, image: item.image, description: item.description })}
+                  className="px-3 py-1.5 bg-[#ff6b9d]/10 text-[#ff6b9d] font-medium text-xs rounded-lg hover:bg-[#ff6b9d] hover:text-white transition-all whitespace-nowrap"
+                >
                   Agregar
                 </button>
               </div>
@@ -305,6 +316,7 @@ export default function MenuPage() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

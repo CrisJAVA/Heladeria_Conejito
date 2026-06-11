@@ -16,6 +16,10 @@ import AdminConfiguracion from "../pages/AdminConfiguracion";
 import MenuPage from "../pages/MenuPage";
 import LoginPage from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
+import CartPage from "../pages/CartPage";
+import ContactPage from "../pages/ContactPage";
+import PromocionesPage from "../pages/PromocionesPage";
+import FidelizacionPage from "../pages/FidelizacionPage";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -53,6 +57,10 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/editar-perfil" element={<ProfilePage />} />
       <Route path="/mis-pedidos" element={<ProfilePage />} />
+      <Route path="/carrito" element={<CartPage />} />
+      <Route path="/contacto" element={<ContactPage />} />
+      <Route path="/promociones" element={<PromocionesPage />} />
+      <Route path="/fidelizacion" element={<FidelizacionPage />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/productos" element={<AdminProducts />} />
       <Route path="/admin/pedidos" element={<AdminOrders />} />

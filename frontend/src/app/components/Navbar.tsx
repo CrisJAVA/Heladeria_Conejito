@@ -3,6 +3,7 @@ import { IceCream, Menu, X, ShoppingBag, User, Package, Settings, LogOut } from 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -24,9 +26,9 @@ export default function Navbar() {
   const navLinks = [
     { name: "Inicio", href: "/" },
     { name: "Menú", href: "/menu" },
-    { name: "Promociones", href: "#promociones" },
-    { name: "Fidelización", href: "#fidelizacion" },
-    { name: "Contacto", href: "#contacto" },
+    { name: "Promociones", href: "/promociones" },
+    { name: "Fidelización", href: "/fidelizacion" },
+    { name: "Contacto", href: "/contacto" },
   ];
 
   const handleLogout = () => {
@@ -142,6 +144,19 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/carrito")}
+              className="relative flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-[#ff6b9d] rounded-full font-medium transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#ff6b9d] text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                  {totalItems}
+                </span>
+              )}
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -219,6 +234,16 @@ export default function Navbar() {
                   Iniciar Sesión
                 </button>
               )}
+              <button
+                onClick={() => { navigate("/carrito"); setIsOpen(false); }}
+                className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-[#ff6b9d] font-medium transition-colors relative"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                Carrito
+                {totalItems > 0 && (
+                  <span className="w-5 h-5 bg-[#ff6b9d] text-white text-[10px] font-bold flex items-center justify-center rounded-full">{totalItems}</span>
+                )}
+              </button>
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4">
                 <ShoppingBag className="w-5 h-5" />
                 Pedir Ahora

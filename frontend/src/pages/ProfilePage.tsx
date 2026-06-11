@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Star, TrendingUp, Gift, Percent, Truck, Medal, Award, ChefHat, IceCream } from "lucide-react";
+import { ArrowLeft, Camera, Star, TrendingUp, Gift, Percent, Truck, Medal, Award } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import Footer from "../app/components/Footer";
 
 const purchaseHistory = [
   { id: "#102", date: "10/05/2025", total: 45.0, status: "Entregado" },
@@ -291,6 +292,7 @@ export default function ProfilePage() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }
