@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { IceCream, Menu, X, ShoppingBag } from "lucide-react";
+import { IceCream, Menu, X, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +8,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const navLinks = [
-    { name: "Inicio", href: "#inicio" },
+    { name: "Inicio", href: "/" },
     { name: "Menú", href: "/menu" },
     { name: "Promociones", href: "#promociones" },
     { name: "Fidelización", href: "#fidelizacion" },
@@ -52,7 +52,16 @@ export default function Navbar() {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/login")}
+              className="flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-[#ff6b9d] rounded-full font-medium transition-colors"
+            >
+              <User className="w-5 h-5" />
+              Iniciar Sesión
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -94,6 +103,13 @@ export default function Navbar() {
                   {link.name}
                 </button>
               ))}
+              <button
+                onClick={() => { navigate("/login"); setIsOpen(false); }}
+                className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-[#ff6b9d] font-medium transition-colors"
+              >
+                <User className="w-5 h-5" />
+                Iniciar Sesión
+              </button>
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4">
                 <ShoppingBag className="w-5 h-5" />
                 Pedir Ahora

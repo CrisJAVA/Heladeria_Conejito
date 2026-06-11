@@ -14,6 +14,7 @@ import AdminOrders from "../pages/AdminOrders";
 import AdminClientes from "../pages/AdminClientes";
 import AdminConfiguracion from "../pages/AdminConfiguracion";
 import MenuPage from "../pages/MenuPage";
+import LoginPage from "../pages/LoginPage";
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/menu" element={<MenuPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/productos" element={<AdminProducts />} />
       <Route path="/admin/pedidos" element={<AdminOrders />} />
