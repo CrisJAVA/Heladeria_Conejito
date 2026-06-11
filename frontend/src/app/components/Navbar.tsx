@@ -1,11 +1,25 @@
-import { motion } from "motion/react";
-import { IceCream, Menu, X, ShoppingBag, User } from "lucide-react";
-import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { IceCream, Menu, X, ShoppingBag, User, Package, Settings, LogOut } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const navLinks = [
     { name: "Inicio", href: "/" },
@@ -14,6 +28,12 @@ export default function Navbar() {
     { name: "Fidelización", href: "#fidelizacion" },
     { name: "Contacto", href: "#contacto" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    setShowDropdown(false);
+    navigate("/");
+  };
 
   return (
     <motion.nav
@@ -27,6 +47,7 @@ export default function Navbar() {
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="flex items-center gap-3 cursor-pointer"
+            onClick={() => navigate("/")}
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
               <IceCream className="w-6 h-6 text-white" />
@@ -53,15 +74,71 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/login")}
-              className="flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-[#ff6b9d] rounded-full font-medium transition-colors"
-            >
-              <User className="w-5 h-5" />
-              Iniciar Sesión
-            </motion.button>
+            {user ? (
+              <div className="relative" ref={dropdownRef}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-[#ff6b9d] rounded-full font-medium transition-colors border border-gray-200 hover:border-[#ff6b9d]"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm max-w-[120px] truncate">{user.name}</span>
+                </motion.button>
+
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-medium text-[#2d2d2d] truncate">{user.name}</p>
+                        <p className="text-xs text-gray-400">Cliente</p>
+                      </div>
+                      <button
+                        onClick={() => { navigate("/mis-pedidos"); setShowDropdown(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#ff6b9d] transition-colors"
+                      >
+                        <Package className="w-4 h-4" />
+                        Ver mis pedidos
+                      </button>
+                      <button
+                        onClick={() => { navigate("/editar-perfil"); setShowDropdown(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#ff6b9d] transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Editar perfil
+                      </button>
+                      <div className="border-t border-gray-100 mt-1 pt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/login")}
+                className="flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-[#ff6b9d] rounded-full font-medium transition-colors"
+              >
+                <User className="w-5 h-5" />
+                Iniciar Sesión
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -103,13 +180,45 @@ export default function Navbar() {
                   {link.name}
                 </button>
               ))}
-              <button
-                onClick={() => { navigate("/login"); setIsOpen(false); }}
-                className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-[#ff6b9d] font-medium transition-colors"
-              >
-                <User className="w-5 h-5" />
-                Iniciar Sesión
-              </button>
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 px-2 py-2 border-t border-gray-100">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm text-gray-700 truncate">{user.name}</span>
+                  </div>
+                  <button
+                    onClick={() => { navigate("/mis-pedidos"); setIsOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-2 text-gray-600 hover:text-[#ff6b9d] transition-colors text-sm"
+                  >
+                    <Package className="w-4 h-4" />
+                    Ver mis pedidos
+                  </button>
+                  <button
+                    onClick={() => { navigate("/editar-perfil"); setIsOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-2 text-gray-600 hover:text-[#ff6b9d] transition-colors text-sm"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Editar perfil
+                  </button>
+                  <button
+                    onClick={() => { handleLogout(); setIsOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 transition-colors text-sm"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { navigate("/login"); setIsOpen(false); }}
+                  className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-[#ff6b9d] font-medium transition-colors"
+                >
+                  <User className="w-5 h-5" />
+                  Iniciar Sesión
+                </button>
+              )}
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4">
                 <ShoppingBag className="w-5 h-5" />
                 Pedir Ahora
