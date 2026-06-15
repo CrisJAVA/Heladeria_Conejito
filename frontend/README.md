@@ -6,7 +6,7 @@ Este es el módulo frontend para el sistema de la **Heladería Conejito**. El di
 
 Sigue estos pasos para levantar el servidor de desarrollo del frontend.
 
-### 🚀 Primera vez (Instalación e Inicio)
+### Primera vez (Instalación e Inicio)
 
 Si es la primera vez que descargas o clonas el proyecto, debes instalar todas las dependencias necesarias antes de iniciarlo:
 
@@ -26,7 +26,7 @@ Si es la primera vez que descargas o clonas el proyecto, debes instalar todas la
 
 ---
 
-### 🔄 Ejecuciones posteriores (Luego)
+### Ejecuciones posteriores (Luego)
 
 Para las siguientes veces que desees ejecutar el proyecto (una vez que ya instalaste las dependencias):
 
