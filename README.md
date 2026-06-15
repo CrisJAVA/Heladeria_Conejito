@@ -3,28 +3,27 @@
   <img src="assets/banner.png" width="900"/>
 </p>
 
-## Día 4 - 11/06/2026
+## Día 5 - 15/06/2026
 
 ### Actividades Realizadas
 
 **Backend:**
-- Sin modificaciones en esta sesión (se mantiene la API y conexión a la base de datos H2 en desarrollo).
+- **Base de datos persistente:** Migración de H2 en memoria (`jdbc:h2:mem:testdb`) a H2 en archivo (`jdbc:h2:file:./database/data/heladeria`). Los datos ahora persisten entre reinicios del servidor.
+- **Esquema PostgreSQL (`database/schema.sql`):** Creación del esquema completo con 13 tablas (categorías, productos, usuarios, pedidos, promociones, niveles de fidelización, beneficios, puntos, etc.) y datos iniciales (promociones, niveles, beneficios, métodos de pago y entrega).
+- **Configuración de producción:** Se agregó configuración comentada para PostgreSQL lista para desplegar.
 
 **Frontend:**
-- **Página de Menú interactivo (`MenuPage.tsx`):** Diseño y desarrollo de la vista principal de productos con categorías navegables, barra de búsqueda reactiva y filtro por rango de precios.
-- **Navegación Dinámica (`Navbar.tsx`):** Configuración completa de enlaces y lógica del menú responsivo, incluyendo el badge dinámico con el total de artículos en el carrito.
-- **Módulo de Usuario y Autenticación:** Creación de la página de Login (`LoginPage.tsx`), el perfil del cliente (`ProfilePage.tsx`) para la edición de datos e historial de pedidos, y el contexto global de sesión (`AuthContext.tsx`).
-- **Carrito de Compras (`CartPage.tsx` y `CartContext.tsx`):** Implementación del estado global del carrito con funciones para agregar, remover y calcular sumatorias totales, además del formulario para proceder con el pedido (checkout).
-- **Vistas Complementarias:**
-  - `PromocionesPage.tsx`: Módulo de descuentos y ofertas de temporada.
-  - `FidelizacionPage.tsx`: Módulo de acumulación de puntos (Conejipuntos) y recompensas.
-  - `ContactPage.tsx`: Formulario de contacto y soporte con mapa de ubicación.
-- **Rutas de la Aplicación (`App.tsx`):** Integración y orquestación de todas las páginas de la aplicación mediante React Router.
+- **Rediseño del Carrito (`CartPage.tsx`):** Mejora visual del resumen de pedido con colores, sección de tiempo estimado (30-40 min), método de entrega con radio buttons, método de pago en grid 2×2 y botón de confirmar estilizado.
+- **Página de Contacto (`ContactPage.tsx`):** Mapa de ubicación, horario de atención, información del local, formulario de contacto, testimonios de clientes y galería de fotos.
+- **Página de Promociones (`PromocionesPage.tsx`):** Grid con 8 promociones (2x1 conos, combo familiar, happy hour, helado de cumpleaños, combo estudiantes, toppings extra, noche de pizzas, sabor del mes).
+- **Página de Fidelización (`FidelizacionPage.tsx`):** 4 niveles (Bronce, Plata, Oro, Diamante) con sus beneficios detallados, puntos mínimos y progresión.
+- **Navegación:** Los enlaces del Navbar y Footer ahora apuntan a las rutas correspondientes (`/promociones`, `/fidelizacion`, `/contacto`).
 
 **Estado Actual:**
-- Backend: http://localhost:8080 (Spring Boot + H2)
+- Backend: http://localhost:8080 (Spring Boot + H2 file-based)
 - Frontend: http://localhost:5173 (React + Tailwind CSS + Vite)
-- Ambos servidores ejecutándose en desarrollo.
+- Base de datos: H2 persistente en `database/data/heladeria.mv.db`
+- Esquema PostgreSQL listo en `database/schema.sql`
 
 ---
 
@@ -109,7 +108,8 @@ El sistema contará con:
 
 ## Base de Datos
 
-* PostgreSQL
+* PostgreSQL (producción)
+* H2 (desarrollo - archivo persistente)
 
 ## Herramientas
 
@@ -189,14 +189,24 @@ Desarrollar una plataforma web que permita mejorar la atención al cliente y opt
 * Desarrollo del Panel Administrativo (Dashboard) completo
 * Vistas de control de Productos, Pedidos, Clientes y Configuración general
 
-## Día #4 (Hoy)
+## Día #4
 * Página del Menú principal interactivo con filtros, búsqueda y precios
 * Módulo de Usuario con Login, Perfil de cliente y sesión persistente (`AuthContext`)
 * Carrito de compras funcional con contexto global (`CartContext`) y vista de checkout
 * Páginas adicionales (Promociones, Fidelización con puntos, Contacto)
 * Integración de rutas frontend y primera versión demo funcional (MVP)
 
+## Día #5 (Hoy)
+* Base de datos persistente: migración de H2 en memoria a H2 en archivo
+* Esquema PostgreSQL completo (`database/schema.sql`) con 13 tablas y datos iniciales
+* Rediseño del carrito de compras con mejoras visuales y UX
+* Página de Contacto con mapa, horarios, formulario y testimonios
+* Página de Promociones con 8 ofertas activas
+* Página de Fidelización con 4 niveles y sus beneficios
+* Navegación completa con rutas para todas las nuevas páginas
+* Guía de primeros pasos (`PRIMEROS_PASOS.me`)
+
 
 # Estado del Proyecto
 
- En desarrollo (Demo funcional completo en el frontend)
+ En desarrollo (Frontend completo + Base de datos persistente)

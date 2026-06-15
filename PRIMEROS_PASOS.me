@@ -1,0 +1,97 @@
+╔══════════════════════════════════════════════════════╗
+║     HELADERÍA CONEJITO - GUÍA DE PRIMEROS PASOS      ║
+╚══════════════════════════════════════════════════════╝
+
+
+1. REQUISITOS
+   ──────────────────────────────────────────────────
+   • Node.js 18+         ─→  node --version
+   • Java 21+            ─→  java --version
+   • Maven (wrapper incluido, no necesita instalación)
+
+
+2. CLONAR EL PROYECTO
+   ──────────────────────────────────────────────────
+   git clone <url-del-repositorio>
+   cd Heladeria_Conejito
+
+
+3. LEVANTAR EL BACKEND (Spring Boot)
+   ──────────────────────────────────────────────────
+   cd backend/backend
+   .\mvnw.cmd spring-boot:run
+
+   • El servidor inicia en: http://localhost:8080
+   • Consola H2:           http://localhost:8080/h2-console
+     (JDBC URL: jdbc:h2:file:./database/data/heladeria)
+
+
+4. LEVANTAR EL FRONTEND (React + Vite)
+   ──────────────────────────────────────────────────
+   cd frontend
+   npm install        (solo la primera vez)
+   npm run dev
+
+   • El servidor inicia en: http://localhost:5173
+
+
+5. BASE DE DATOS
+   ──────────────────────────────────────────────────
+   • Desarrollo: H2 en archivo (database/data/heladeria.mv.db)
+     Los datos persisten entre reinicios automáticamente.
+
+   • Producción: PostgreSQL
+     El esquema está en database/schema.sql
+     Para ejecutarlo:
+       psql -d heladeria_conejito -f database/schema.sql
+
+     En application.properties, descomentar la sección
+     de PostgreSQL y comentar la de H2.
+
+
+6. ESTRUCTURA DEL PROYECTO
+   ──────────────────────────────────────────────────
+   Heladeria_Conejito/
+   ├── database/           ← Esquema SQL (PostgreSQL)
+   ├── backend/
+   │   └── backend/        ← Spring Boot (Java 21)
+   │       └── src/main/
+   │           ├── java/.../controller/
+   │           ├── java/.../service/
+   │           ├── java/.../repository/
+   │           ├── java/.../model/
+   │           ├── java/.../dto/
+   │           └── resources/
+   │               └── application.properties
+   └── frontend/           ← React + Vite + Tailwind
+       └── src/
+           ├── pages/
+           ├── app/components/
+           ├── context/
+           └── ...
+
+
+7. RUTAS DEL FRONTEND
+   ──────────────────────────────────────────────────
+   /                → Landing page
+   /menu            → Menú interactivo
+   /carrito         → Carrito de compras
+   /login           → Inicio de sesión
+   /contacto        → Contacto y ubicación
+   /promociones     → Promociones activas
+   /fidelizacion    → Programa de fidelización
+   /editar-perfil   → Perfil de usuario
+   /mis-pedidos     → Historial de pedidos
+   /admin/*         → Panel administrativo
+
+
+8. COMANDOS ÚTILES
+   ──────────────────────────────────────────────────
+   Backend:
+     .\mvnw.cmd compile          → Compilar
+     .\mvnw.cmd test             → Ejecutar tests
+     .\mvnw.cmd clean            → Limpiar build
+
+   Frontend:
+     npm run dev                 → Desarrollo
+     npm run build               → Build producción
