@@ -8,9 +8,12 @@
 ### Actividades Realizadas
 
 **Backend:**
-- **Base de datos persistente:** Migración de H2 en memoria (`jdbc:h2:mem:testdb`) a H2 en archivo (`jdbc:h2:file:./database/data/heladeria`). Los datos ahora persisten entre reinicios del servidor.
-- **Esquema PostgreSQL (`database/schema.sql`):** Creación del esquema completo con 13 tablas (categorías, productos, usuarios, pedidos, promociones, niveles de fidelización, beneficios, puntos, etc.) y datos iniciales (promociones, niveles, beneficios, métodos de pago y entrega).
-- **Configuración de producción:** Se agregó configuración comentada para PostgreSQL lista para desplegar.
+- **Migración a PostgreSQL:** Cambio completo de H2 a PostgreSQL como base de datos principal. Configuración activa en `application.properties`.
+- **Esquema PostgreSQL (`database/schema.sql`):** Esquema completo con 13 tablas (categorías, productos, usuarios, pedidos, promociones, niveles de fidelización, beneficios, puntos, etc.) y datos iniciales.
+- **Entidades JPA:** Creación de 12 entidades (`Categoria`, `Producto`, `Usuario`, `NivelFidelizacion`, `Beneficio`, `Puntos`, `HistorialPuntos`, `Promocion`, `MetodoEntrega`, `MetodoPago`, `Pedido`, `DetallePedido`) con anotaciones Jakarta Persistence y relaciones bidireccionales.
+- **Repositorios Spring Data JPA:** 7 repositorios con consultas personalizadas (búsqueda por nombre, categoría, disponibilidad, nivel de fidelización, etc.).
+- **API REST de Productos:** `ProductoController` con endpoints CRUD + filtros por categoría, búsqueda por nombre, disponibles y destacados.
+- **CORS Config:** Permitido origen del frontend (`localhost:5173`).
 
 **Frontend:**
 - **Rediseño del Carrito (`CartPage.tsx`):** Mejora visual del resumen de pedido con colores, sección de tiempo estimado (30-40 min), método de entrega con radio buttons, método de pago en grid 2×2 y botón de confirmar estilizado.
@@ -95,21 +98,20 @@ El sistema contará con:
 
 * React
 * Vite
-* JavaScript
-* CSS
+* Tailwind CSS
+* TypeScript
 
 ## Backend
 
-* Java Spring Boot
+* Java 21 - Spring Boot 4.0.6
 * Spring Web
-* Spring Data JPA
+* Spring Data JPA / Hibernate
 * PostgreSQL
 * Lombok
 
 ## Base de Datos
 
-* PostgreSQL (producción)
-* H2 (desarrollo - archivo persistente)
+* PostgreSQL
 
 ## Herramientas
 
@@ -196,7 +198,7 @@ Desarrollar una plataforma web que permita mejorar la atención al cliente y opt
 * Páginas adicionales (Promociones, Fidelización con puntos, Contacto)
 * Integración de rutas frontend y primera versión demo funcional (MVP)
 
-## Día #5 (Hoy)
+## Día #5
 * Base de datos persistente: migración de H2 en memoria a H2 en archivo
 * Esquema PostgreSQL completo (`database/schema.sql`) con 13 tablas y datos iniciales
 * Rediseño del carrito de compras con mejoras visuales y UX
@@ -206,7 +208,15 @@ Desarrollar una plataforma web que permita mejorar la atención al cliente y opt
 * Navegación completa con rutas para todas las nuevas páginas
 * Guía de primeros pasos (`PRIMEROS_PASOS.me`)
 
+## Día #6 (Hoy)
+* Migración definitiva a PostgreSQL: base de datos principal activa
+* 12 entidades JPA creadas para todas las tablas del esquema
+* 7 repositorios Spring Data JPA con consultas personalizadas
+* API REST de productos (CRUD + filtros) en `/api/productos`
+* Configuración CORS para integración con el frontend
+* Documentación actualizada para PostgreSQL
+
 
 # Estado del Proyecto
 
- En desarrollo (Frontend completo + Base de datos persistente)
+ En desarrollo (Frontend completo + Backend con PostgreSQL)

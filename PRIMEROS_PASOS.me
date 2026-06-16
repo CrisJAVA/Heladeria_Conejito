@@ -8,6 +8,7 @@
    • Node.js 18+         ─→  node --version
    • Java 21+            ─→  java --version
    • Maven (wrapper incluido, no necesita instalación)
+   • PostgreSQL 15+      ─→  psql --version
 
 
 2. CLONAR EL PROYECTO
@@ -16,37 +17,37 @@
    cd Heladeria_Conejito
 
 
-3. LEVANTAR EL BACKEND (Spring Boot)
+3. CONFIGURAR BASE DE DATOS
+   ──────────────────────────────────────────────────
+   a) Asegúrate de tener PostgreSQL corriendo.
+
+   b) Crea la base de datos:
+      psql -U postgres -c "CREATE DATABASE heladeria_conejito;"
+
+   c) Carga el esquema y datos iniciales:
+      psql -U postgres -d heladeria_conejito -f database/schema.sql
+
+   d) Si tu contraseña de PostgreSQL es distinta a "postgres",
+      edita backend/backend/src/main/resources/application.properties
+      y cambia: spring.datasource.password=tu_password
+
+
+4. LEVANTAR EL BACKEND (Spring Boot)
    ──────────────────────────────────────────────────
    cd backend/backend
    .\mvnw.cmd spring-boot:run
 
    • El servidor inicia en: http://localhost:8080
-   • Consola H2:           http://localhost:8080/h2-console
-     (JDBC URL: jdbc:h2:file:./database/data/heladeria)
+   • Endpoints disponibles en: http://localhost:8080/api/productos
 
 
-4. LEVANTAR EL FRONTEND (React + Vite)
+5. LEVANTAR EL FRONTEND (React + Vite)
    ──────────────────────────────────────────────────
    cd frontend
    npm install        (solo la primera vez)
    npm run dev
 
    • El servidor inicia en: http://localhost:5173
-
-
-5. BASE DE DATOS
-   ──────────────────────────────────────────────────
-   • Desarrollo: H2 en archivo (database/data/heladeria.mv.db)
-     Los datos persisten entre reinicios automáticamente.
-
-   • Producción: PostgreSQL
-     El esquema está en database/schema.sql
-     Para ejecutarlo:
-       psql -d heladeria_conejito -f database/schema.sql
-
-     En application.properties, descomentar la sección
-     de PostgreSQL y comentar la de H2.
 
 
 6. ESTRUCTURA DEL PROYECTO
