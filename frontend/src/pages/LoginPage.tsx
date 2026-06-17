@@ -11,16 +11,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError("Todos los campos son obligatorios");
       return;
     }
     setError("");
-    login(email);
-    navigate("/menu");
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      if (user.rol === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,7 +46,6 @@ export default function LoginPage() {
           Volver
         </button>
       </header>
-
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
@@ -44,14 +55,12 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-[#2d2d2d]">Iniciar Sesión</h1>
             <p className="text-gray-500 text-sm mt-1">Ingresa a tu cuenta para pedir más rápido</p>
           </div>
-
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-5">
             {error && (
               <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
                 {error}
               </div>
             )}
-
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700">Correo electrónico</label>
               <div className="relative">
@@ -65,7 +74,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700">Contraseña</label>
               <div className="relative">
@@ -86,27 +94,20 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded border-gray-300 text-[#ff6b9d] focus:ring-[#ff6b9d]" />
-                <span className="text-gray-600">Recordarme</span>
-              </label>
-              <button type="button" className="text-[#ff6b9d] hover:underline font-medium">
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Iniciar Sesión
+              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </button>
-
             <p className="text-center text-sm text-gray-500">
               ¿No tienes cuenta?{" "}
-              <button type="button" className="text-[#ff6b9d] hover:underline font-medium">
+              <button
+                type="button"
+                onClick={() => navigate("/registro")}
+                className="text-[#ff6b9d] hover:underline font-medium"
+              >
                 Registrarse
               </button>
             </p>

@@ -87,7 +87,7 @@ export default function Navbar() {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm max-w-[120px] truncate">{user.name}</span>
+                  <span className="text-sm max-w-[120px] truncate">{user.nombre}</span>
                 </motion.button>
 
                 <AnimatePresence>
@@ -100,8 +100,8 @@ export default function Navbar() {
                       className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 overflow-hidden"
                     >
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-[#2d2d2d] truncate">{user.name}</p>
-                        <p className="text-xs text-gray-400">Cliente</p>
+                        <p className="text-sm font-medium text-[#2d2d2d] truncate">{user.nombre}</p>
+                        <p className="text-xs text-gray-400">{user.email}</p>
                       </div>
                       <button
                         onClick={() => { navigate("/mis-pedidos"); setShowDropdown(false); }}
@@ -201,7 +201,7 @@ export default function Navbar() {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm text-gray-700 truncate">{user.name}</span>
+                    <span className="text-sm text-gray-700 truncate">{user.nombre}</span>
                   </div>
                   <button
                     onClick={() => { navigate("/mis-pedidos"); setIsOpen(false); }}

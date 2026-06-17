@@ -19,15 +19,16 @@ import {
   SelectValue,
 } from "./ui/select";
 import { listarCategorias, type CategoriaDTO } from "../../services/categorias";
-import { crearProducto, type ProductoDTO } from "../../services/productos";
+import { crearProducto, actualizarProducto, type ProductoDTO } from "../../services/productos";
 
 interface ProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  product?: ProductoDTO | null;
 }
 
-export default function ProductModal({ open, onOpenChange, onSuccess }: ProductModalProps) {
+export default function ProductModal({ open, onOpenChange, onSuccess, product }: ProductModalProps) {
   const [categorias, setCategorias] = useState<CategoriaDTO[]>([]);
   const [categoriaId, setCategoriaId] = useState("");
   const [nombre, setNombre] = useState("");
@@ -39,26 +40,42 @@ export default function ProductModal({ open, onOpenChange, onSuccess }: ProductM
   const [destacado, setDestacado] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loadCats, setLoadCats] = useState(true);
+  const [catsLoaded, setCatsLoaded] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
+
+  const isEditing = !!product;
 
   useEffect(() => {
     if (!open) return;
-    setCategoriaId("");
-    setNombre("");
-    setDescripcion("");
-    setPrecio("");
-    setImagenUrl("");
-    setStock("0");
-    setDisponible(true);
-    setDestacado(false);
-    setErrors({});
-    if (loadCats) {
+    if (!catsLoaded) {
       listarCategorias()
         .then(setCategorias)
         .catch(() => setErrors((e) => ({ ...e, _general: "Error al cargar categorías" })))
-        .finally(() => setLoadCats(false));
+        .finally(() => setCatsLoaded(true));
     }
-  }, [open]);
+    if (product && !prefilled) {
+      setCategoriaId(String(product.categoriaId));
+      setNombre(product.nombre);
+      setDescripcion(product.descripcion || "");
+      setPrecio(String(product.precio));
+      setImagenUrl(product.imagenUrl || "");
+      setStock(String(product.stock));
+      setDisponible(product.disponible);
+      setDestacado(product.destacado);
+      setPrefilled(true);
+    } else if (!product) {
+      setCategoriaId("");
+      setNombre("");
+      setDescripcion("");
+      setPrecio("");
+      setImagenUrl("");
+      setStock("0");
+      setDisponible(true);
+      setDestacado(false);
+      setPrefilled(false);
+    }
+    setErrors({});
+  }, [open, product]);
 
   const validar = (): boolean => {
     const errs: Record<string, string> = {};
@@ -76,7 +93,7 @@ export default function ProductModal({ open, onOpenChange, onSuccess }: ProductM
     if (!validar()) return;
     setLoading(true);
     try {
-      await crearProducto({
+      const dto = {
         categoriaId: parseInt(categoriaId, 10),
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
@@ -85,11 +102,16 @@ export default function ProductModal({ open, onOpenChange, onSuccess }: ProductM
         stock: parseInt(stock, 10),
         disponible,
         destacado,
-      });
+      };
+      if (isEditing && product?.id) {
+        await actualizarProducto(product.id, dto);
+      } else {
+        await crearProducto(dto);
+      }
       onOpenChange(false);
       onSuccess();
     } catch {
-      setErrors({ _general: "Error al guardar el producto. Intenta de nuevo." });
+      setErrors({ _general: `Error al ${isEditing ? "actualizar" : "guardar"} el producto. Intenta de nuevo.` });
     } finally {
       setLoading(false);
     }
@@ -101,7 +123,9 @@ export default function ProductModal({ open, onOpenChange, onSuccess }: ProductM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[24px] font-bold text-[#191c1d]">Nuevo Producto</DialogTitle>
+          <DialogTitle className="text-[24px] font-bold text-[#191c1d]">
+            {isEditing ? "Editar Producto" : "Nuevo Producto"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
@@ -238,10 +262,10 @@ export default function ProductModal({ open, onOpenChange, onSuccess }: ProductM
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-[#761235] border-t-transparent rounded-full animate-spin" />
-                Guardando...
+                {isEditing ? "Actualizando..." : "Guardando..."}
               </span>
             ) : (
-              "Guardar Producto"
+              isEditing ? "Actualizar Producto" : "Guardar Producto"
             )}
           </Button>
         </DialogFooter>

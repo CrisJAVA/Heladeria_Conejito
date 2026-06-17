@@ -15,7 +15,6 @@ export interface ProductoDTO {
 
 export async function listarProductos(): Promise<ProductoDTO[]> {
   const res = await fetch(`${API_BASE}/productos`);
-  console.log("GET /api/productos status:", res.status);
   if (!res.ok) {
     const text = await res.text();
     console.log("GET /api/productos error body:", text);
@@ -26,6 +25,12 @@ export async function listarProductos(): Promise<ProductoDTO[]> {
   return data;
 }
 
+export async function obtenerProducto(id: number): Promise<ProductoDTO> {
+  const res = await fetch(`${API_BASE}/productos/${id}`);
+  if (!res.ok) throw new Error("Error al obtener producto");
+  return res.json();
+}
+
 export async function crearProducto(dto: ProductoDTO): Promise<ProductoDTO> {
   const res = await fetch(`${API_BASE}/productos`, {
     method: "POST",
@@ -33,5 +38,15 @@ export async function crearProducto(dto: ProductoDTO): Promise<ProductoDTO> {
     body: JSON.stringify(dto),
   });
   if (!res.ok) throw new Error("Error al crear producto");
+  return res.json();
+}
+
+export async function actualizarProducto(id: number, dto: ProductoDTO): Promise<ProductoDTO> {
+  const res = await fetch(`${API_BASE}/productos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dto),
+  });
+  if (!res.ok) throw new Error("Error al actualizar producto");
   return res.json();
 }

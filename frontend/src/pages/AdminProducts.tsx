@@ -12,6 +12,7 @@ export default function AdminProducts() {
   const [products, setProducts] = useState<ProductoDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductoDTO | null>(null);
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
 
@@ -143,7 +144,7 @@ export default function AdminProducts() {
               <p className="text-[14px] leading-[20px] text-[#564245]">Gestiona tu catálogo de productos, stock y precios.</p>
             </div>
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={() => { setEditingProduct(null); setModalOpen(true); }}
               className="bg-[#ff7e9d] text-[#761235] hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-200 px-6 py-3 rounded-2xl flex items-center gap-2 font-bold shadow-sm"
             >
               <span className="material-symbols-outlined">add</span>
@@ -247,8 +248,8 @@ export default function AdminProducts() {
                         Ver
                       </button>
                       <button
-                        disabled
-                        className="flex-1 bg-[#7cacd7]/20 text-[#30628a] py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-[14px] opacity-50"
+                        onClick={() => { setEditingProduct(product); setModalOpen(true); }}
+                        className="flex-1 bg-[#7cacd7]/20 text-[#30628a] py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-[14px] hover:bg-[#7cacd7]/40 transition-all"
                       >
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                         Editar
@@ -276,11 +277,13 @@ export default function AdminProducts() {
 
       <ProductModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => { setModalOpen(open); if (!open) setEditingProduct(null); }}
         onSuccess={() => {
-          toast.success("Producto creado correctamente");
+          toast.success(editingProduct ? "Producto actualizado correctamente" : "Producto creado correctamente");
+          setEditingProduct(null);
           loadProducts();
         }}
+        product={editingProduct}
       />
     </div>
   );
