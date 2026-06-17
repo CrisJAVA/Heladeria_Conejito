@@ -1,0 +1,251 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Switch } from "./ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { listarCategorias, type CategoriaDTO } from "../../services/categorias";
+import { crearProducto, type ProductoDTO } from "../../services/productos";
+
+interface ProductModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+}
+
+export default function ProductModal({ open, onOpenChange, onSuccess }: ProductModalProps) {
+  const [categorias, setCategorias] = useState<CategoriaDTO[]>([]);
+  const [categoriaId, setCategoriaId] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [precio, setPrecio] = useState("");
+  const [imagenUrl, setImagenUrl] = useState("");
+  const [stock, setStock] = useState("0");
+  const [disponible, setDisponible] = useState(true);
+  const [destacado, setDestacado] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loadCats, setLoadCats] = useState(true);
+
+  useEffect(() => {
+    if (!open) return;
+    setCategoriaId("");
+    setNombre("");
+    setDescripcion("");
+    setPrecio("");
+    setImagenUrl("");
+    setStock("0");
+    setDisponible(true);
+    setDestacado(false);
+    setErrors({});
+    if (loadCats) {
+      listarCategorias()
+        .then(setCategorias)
+        .catch(() => setErrors((e) => ({ ...e, _general: "Error al cargar categorías" })))
+        .finally(() => setLoadCats(false));
+    }
+  }, [open]);
+
+  const validar = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!categoriaId) errs.categoriaId = "Selecciona una categoría";
+    if (!nombre.trim()) errs.nombre = "El nombre es obligatorio";
+    const p = parseFloat(precio);
+    if (!precio || isNaN(p) || p < 0) errs.precio = "Ingresa un precio válido";
+    const s = parseInt(stock, 10);
+    if (isNaN(s) || s < 0) errs.stock = "El stock no puede ser negativo";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validar()) return;
+    setLoading(true);
+    try {
+      await crearProducto({
+        categoriaId: parseInt(categoriaId, 10),
+        nombre: nombre.trim(),
+        descripcion: descripcion.trim() || undefined,
+        precio: parseFloat(precio),
+        imagenUrl: imagenUrl.trim() || undefined,
+        stock: parseInt(stock, 10),
+        disponible,
+        destacado,
+      });
+      onOpenChange(false);
+      onSuccess();
+    } catch {
+      setErrors({ _general: "Error al guardar el producto. Intenta de nuevo." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const previewError = imagenUrl && !imagenUrl.match(/^https?:\/\/.+/);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-[24px] font-bold text-[#191c1d]">Nuevo Producto</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          {errors._general && (
+            <div className="bg-[#ffdad6] text-[#ba1a1a] px-4 py-3 rounded-xl text-sm font-medium">
+              {errors._general}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label className="text-[#191c1d] font-medium">
+              Categoría <span className="text-[#ba1a1a]">*</span>
+            </Label>
+            <Select value={categoriaId} onValueChange={setCategoriaId}>
+              <SelectTrigger className="w-full bg-[#f3f4f5] border-none rounded-xl">
+                <SelectValue placeholder="Seleccionar categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.categoriaId && (
+              <p className="text-[#ba1a1a] text-xs mt-1">{errors.categoriaId}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[#191c1d] font-medium">
+              Nombre del producto <span className="text-[#ba1a1a]">*</span>
+            </Label>
+            <Input
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="bg-[#f3f4f5] border-none rounded-xl"
+              placeholder="Ej: Cono Triple Arcoíris"
+            />
+            {errors.nombre && <p className="text-[#ba1a1a] text-xs mt-1">{errors.nombre}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[#191c1d] font-medium">Descripción</Label>
+            <Textarea
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              className="bg-[#f3f4f5] border-none rounded-xl resize-none"
+              placeholder="Breve descripción del producto"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-[#191c1d] font-medium">
+                Precio (S/) <span className="text-[#ba1a1a]">*</span>
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={precio}
+                onChange={(e) => setPrecio(e.target.value)}
+                className="bg-[#f3f4f5] border-none rounded-xl"
+                placeholder="0.00"
+              />
+              {errors.precio && <p className="text-[#ba1a1a] text-xs mt-1">{errors.precio}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[#191c1d] font-medium">Stock</Label>
+              <Input
+                type="number"
+                min="0"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="bg-[#f3f4f5] border-none rounded-xl"
+                placeholder="0"
+              />
+              {errors.stock && <p className="text-[#ba1a1a] text-xs mt-1">{errors.stock}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[#191c1d] font-medium">Imagen URL</Label>
+            <Input
+              value={imagenUrl}
+              onChange={(e) => setImagenUrl(e.target.value)}
+              className="bg-[#f3f4f5] border-none rounded-xl"
+              placeholder="https://ejemplo.com/imagen.jpg"
+            />
+            {previewError && (
+              <p className="text-[#ba1a1a] text-xs mt-1">Ingresa una URL válida</p>
+            )}
+            {imagenUrl && imagenUrl.match(/^https?:\/\/.+/i) && (
+              <div className="mt-2 rounded-xl overflow-hidden w-32 h-32 border border-[#e1e3e4]">
+                <img
+                  src={imagenUrl}
+                  alt="Vista previa"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-[#f3f4f5] px-4 py-3">
+            <Label className="text-[#191c1d] font-medium cursor-pointer">Disponible</Label>
+            <Switch checked={disponible} onCheckedChange={setDisponible} />
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-[#f3f4f5] px-4 py-3">
+            <Label className="text-[#191c1d] font-medium cursor-pointer">Destacado</Label>
+            <Switch checked={destacado} onCheckedChange={setDestacado} />
+          </div>
+        </div>
+
+        <DialogFooter className="gap-3 pt-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-xl border-[#e1e3e4] text-[#564245]"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-[#ff7e9d] text-[#761235] hover:bg-[#ff6b9d] rounded-xl font-bold shadow-sm px-6"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-[#761235] border-t-transparent rounded-full animate-spin" />
+                Guardando...
+              </span>
+            ) : (
+              "Guardar Producto"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
