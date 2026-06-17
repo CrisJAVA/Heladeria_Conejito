@@ -6,6 +6,7 @@ import com.heladeria.backend.model.Producto;
 import com.heladeria.backend.repository.CategoriaRepository;
 import com.heladeria.backend.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,42 +21,49 @@ public class ProductoService {
         this.categoriaRepository = categoriaRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoDTO> listarTodos() {
         return productoRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoDTO> listarDisponibles() {
         return productoRepository.findByDisponibleTrue().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoDTO> listarDestacados() {
         return productoRepository.findByDestacadoTrue().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoDTO> buscarPorCategoria(Long categoriaId) {
         return productoRepository.findByCategoriaId(categoriaId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductoDTO> buscarPorNombre(String nombre) {
         return productoRepository.findByNombreContainingIgnoreCase(nombre).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProductoDTO obtenerPorId(Long id) {
         return productoRepository.findById(id)
                 .map(this::toDTO)
                 .orElse(null);
     }
 
+    @Transactional
     public ProductoDTO crear(ProductoDTO dto) {
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
@@ -63,6 +71,7 @@ public class ProductoService {
         return toDTO(productoRepository.save(producto));
     }
 
+    @Transactional
     public ProductoDTO actualizar(Long id, ProductoDTO dto) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
@@ -79,6 +88,7 @@ public class ProductoService {
         return toDTO(productoRepository.save(producto));
     }
 
+    @Transactional
     public void eliminar(Long id) {
         productoRepository.deleteById(id);
     }

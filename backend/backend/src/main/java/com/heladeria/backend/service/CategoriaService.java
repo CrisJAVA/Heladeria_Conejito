@@ -4,6 +4,7 @@ import com.heladeria.backend.dto.CategoriaDTO;
 import com.heladeria.backend.model.Categoria;
 import com.heladeria.backend.repository.CategoriaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ public class CategoriaService {
         this.categoriaRepository = categoriaRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<CategoriaDTO> listarTodas() {
         return categoriaRepository.findByActivoTrue().stream()
                 .map(this::toDTO)

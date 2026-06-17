@@ -15,8 +15,15 @@ export interface ProductoDTO {
 
 export async function listarProductos(): Promise<ProductoDTO[]> {
   const res = await fetch(`${API_BASE}/productos`);
-  if (!res.ok) throw new Error("Error al obtener productos");
-  return res.json();
+  console.log("GET /api/productos status:", res.status);
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("GET /api/productos error body:", text);
+    throw new Error("Error al obtener productos");
+  }
+  const data = await res.json();
+  console.log("Productos recibidos:", data);
+  return data;
 }
 
 export async function crearProducto(dto: ProductoDTO): Promise<ProductoDTO> {
