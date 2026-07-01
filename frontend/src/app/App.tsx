@@ -1,4 +1,5 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import WhatToFind from "./components/WhatToFind";
@@ -18,6 +19,7 @@ import MenuPage from "../pages/MenuPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProfilePage from "../pages/ProfilePage";
+import MisPedidosPage from "../pages/MisPedidosPage";
 import CartPage from "../pages/CartPage";
 import ContactPage from "../pages/ContactPage";
 import PromocionesPage from "../pages/PromocionesPage";
@@ -47,22 +49,25 @@ function LandingPage() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/menu" element={<MenuPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/registro" element={<RegisterPage />} />
-      <Route path="/editar-perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-      <Route path="/mis-pedidos" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-      <Route path="/carrito" element={<CartPage />} />
-      <Route path="/contacto" element={<ContactPage />} />
-      <Route path="/promociones" element={<PromocionesPage />} />
-      <Route path="/fidelizacion" element={<FidelizacionPage />} />
-      <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/productos" element={<ProtectedRoute adminOnly><AdminProducts /></ProtectedRoute>} />
-      <Route path="/admin/pedidos" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
-      <Route path="/admin/clientes" element={<ProtectedRoute adminOnly><AdminClientes /></ProtectedRoute>} />
-      <Route path="/admin/configuracion" element={<ProtectedRoute adminOnly><AdminConfiguracion /></ProtectedRoute>} />
-    </Routes>
+    <>
+      <Toaster position="top-right" richColors />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/menu" element={<MenuPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/editar-perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/mis-pedidos" element={<ProtectedRoute><MisPedidosPage /></ProtectedRoute>} />
+        <Route path="/carrito" element={<CartPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/promociones" element={<PromocionesPage />} />
+        <Route path="/fidelizacion" element={<FidelizacionPage />} />
+        <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/productos" element={<ProtectedRoute adminOnly><AdminProducts /></ProtectedRoute>} />
+        <Route path="/admin/pedidos" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
+        <Route path="/admin/clientes" element={<ProtectedRoute adminOnly><AdminClientes /></ProtectedRoute>} />
+        <Route path="/admin/configuracion" element={<ProtectedRoute adminOnly><AdminConfiguracion /></ProtectedRoute>} />
+      </Routes>
+    </>
   );
 }

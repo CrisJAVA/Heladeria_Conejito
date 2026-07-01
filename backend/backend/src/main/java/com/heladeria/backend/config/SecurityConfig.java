@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/promociones/**").permitAll()
                 .requestMatchers("/api/niveles/**").permitAll()
                 .requestMatchers("/api/usuarios/**").authenticated()
+                .requestMatchers("/api/pedidos/**").authenticated()
                 .anyRequest().permitAll()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

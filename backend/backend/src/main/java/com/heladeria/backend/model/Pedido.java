@@ -3,6 +3,7 @@ package com.heladeria.backend.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,9 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "codigo_pedido", length = 30, unique = true)
+    private String codigoPedido;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -41,6 +45,9 @@ public class Pedido {
     @Column(name = "direccion_entrega", length = 300)
     private String direccionEntrega;
 
+    @Column(name = "numero_operacion", length = 100)
+    private String numeroOperacion;
+
     @Column(length = 500)
     private String nota;
 
@@ -57,6 +64,9 @@ public class Pedido {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (codigoPedido == null) {
+            codigoPedido = "PED-" + createdAt.format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+        }
     }
 
     @PreUpdate
@@ -66,6 +76,8 @@ public class Pedido {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public String getCodigoPedido() { return codigoPedido; }
+    public void setCodigoPedido(String codigoPedido) { this.codigoPedido = codigoPedido; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public MetodoEntrega getMetodoEntrega() { return metodoEntrega; }
@@ -82,6 +94,8 @@ public class Pedido {
     public void setEstado(String estado) { this.estado = estado; }
     public String getDireccionEntrega() { return direccionEntrega; }
     public void setDireccionEntrega(String direccionEntrega) { this.direccionEntrega = direccionEntrega; }
+    public String getNumeroOperacion() { return numeroOperacion; }
+    public void setNumeroOperacion(String numeroOperacion) { this.numeroOperacion = numeroOperacion; }
     public String getNota() { return nota; }
     public void setNota(String nota) { this.nota = nota; }
     public LocalDateTime getCreatedAt() { return createdAt; }

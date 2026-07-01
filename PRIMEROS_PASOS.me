@@ -1,98 +1,149 @@
-╔══════════════════════════════════════════════════════╗
-║     HELADERÍA CONEJITO - GUÍA DE PRIMEROS PASOS      ║
-╚══════════════════════════════════════════════════════╝
+# Heladería Conejito — Primeros Pasos
 
+Guía rápida para levantar el proyecto en local.
 
-1. REQUISITOS
-   ──────────────────────────────────────────────────
-   • Node.js 18+         ─→  node --version
-   • Java 21+            ─→  java --version
-   • Maven (wrapper incluido, no necesita instalación)
-   • PostgreSQL 15+      ─→  psql --version
+---
 
+## Requisitos
 
-2. CLONAR EL PROYECTO
-   ──────────────────────────────────────────────────
-   git clone <url-del-repositorio>
-   cd Heladeria_Conejito
+| Herramienta | Versión | Comprobar |
+|-------------|---------|-----------|
+| Node.js | 18+ | `node --version` |
+| Java | 21+ | `java --version` |
+| Maven | (wrapper incluido) | — |
+| PostgreSQL | 15+ | `psql --version` |
 
+---
 
-3. CONFIGURAR BASE DE DATOS
-   ──────────────────────────────────────────────────
-   a) Asegúrate de tener PostgreSQL corriendo.
+## 1. Clonar el proyecto
 
-   b) Crea la base de datos:
-      psql -U postgres -c "CREATE DATABASE heladeria_conejito;"
+```bash
+git clone <url-del-repositorio>
+cd Heladeria_Conejito
+```
 
-   c) Carga el esquema y datos iniciales:
-      psql -U postgres -d heladeria_conejito -f database/schema.sql
+---
 
-   d) Si tu contraseña de PostgreSQL es distinta a "postgres",
-      edita backend/backend/src/main/resources/application.properties
-      y cambia: spring.datasource.password=tu_password
+## 2. Configurar la base de datos
 
+Asegúrate de tener PostgreSQL corriendo y crea la base de datos:
 
-4. LEVANTAR EL BACKEND (Spring Boot)
-   ──────────────────────────────────────────────────
-   cd backend/backend
-   .\mvnw.cmd spring-boot:run
+```bash
+psql -U postgres -c "CREATE DATABASE heladeria_conejito;"
+```
 
-   • El servidor inicia en: http://localhost:8080
-   • Endpoints disponibles en: http://localhost:8080/api/productos
+Carga el esquema y datos iniciales:
 
+```bash
+psql -U postgres -d heladeria_conejito -f database/schema.sql
+```
 
-5. LEVANTAR EL FRONTEND (React + Vite)
-   ──────────────────────────────────────────────────
-   cd frontend
-   npm install        (solo la primera vez)
-   npm run dev
+> Si tu contraseña de PostgreSQL es distinta a `postgres`, edita  
+> `backend/backend/src/main/resources/application.properties`  
+> y cambia: `spring.datasource.password=tu_password`
 
-   • El servidor inicia en: http://localhost:5173
+---
 
+## 3. Levantar el backend (Spring Boot)
 
-6. ESTRUCTURA DEL PROYECTO
-   ──────────────────────────────────────────────────
-   Heladeria_Conejito/
-   ├── database/           ← Esquema SQL (PostgreSQL)
-   ├── backend/
-   │   └── backend/        ← Spring Boot (Java 21)
-   │       └── src/main/
-   │           ├── java/.../controller/
-   │           ├── java/.../service/
-   │           ├── java/.../repository/
-   │           ├── java/.../model/
-   │           ├── java/.../dto/
-   │           └── resources/
-   │               └── application.properties
-   └── frontend/           ← React + Vite + Tailwind
-       └── src/
-           ├── pages/
-           ├── app/components/
-           ├── context/
-           └── ...
+```bash
+cd backend/backend
+.\mvnw.cmd spring-boot:run
+```
 
+- El servidor inicia en: **http://localhost:8080**
+- Endpoints disponibles: `http://localhost:8080/api/productos`
+- Documentación de APIs disponible en Postman
 
-7. RUTAS DEL FRONTEND
-   ──────────────────────────────────────────────────
-   /                → Landing page
-   /menu            → Menú interactivo
-   /carrito         → Carrito de compras
-   /login           → Inicio de sesión
-   /contacto        → Contacto y ubicación
-   /promociones     → Promociones activas
-   /fidelizacion    → Programa de fidelización
-   /editar-perfil   → Perfil de usuario
-   /mis-pedidos     → Historial de pedidos
-   /admin/*         → Panel administrativo
+---
 
+## 4. Levantar el frontend (React + Vite)
 
-8. COMANDOS ÚTILES
-   ──────────────────────────────────────────────────
-   Backend:
-     .\mvnw.cmd compile          → Compilar
-     .\mvnw.cmd test             → Ejecutar tests
-     .\mvnw.cmd clean            → Limpiar build
+```bash
+cd frontend
+npm install        # solo la primera vez
+npm run dev
+```
 
-   Frontend:
-     npm run dev                 → Desarrollo
-     npm run build               → Build producción
+- El servidor inicia en: **http://localhost:5173**
+
+---
+
+## 5. Cuentas predefinidas
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Administrador | `admin@gmail.com` | `admin123` |
+| Cliente | (registrarse en `/registro`) | (la que elijas) |
+
+> El admin se crea automáticamente al iniciar el backend si no existe.
+
+---
+
+## 6. Rutas del frontend
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Landing page |
+| `/menu` | Menú interactivo |
+| `/carrito` | Carrito de compras |
+| `/login` | Inicio de sesión |
+| `/registro` | Registro de usuario |
+| `/contacto` | Contacto y ubicación |
+| `/promociones` | Promociones activas |
+| `/fidelizacion` | Programa de fidelización |
+| `/editar-perfil` | Perfil de usuario |
+| `/mis-pedidos` | Historial de pedidos |
+| `/admin/*` | Panel administrativo |
+
+---
+
+## 7. Comandos útiles
+
+### Backend
+
+```bash
+.\mvnw.cmd compile          # Compilar
+.\mvnw.cmd test             # Ejecutar tests
+.\mvnw.cmd clean            # Limpiar build
+.\mvnw.cmd spring-boot:run  # Iniciar servidor
+```
+
+### Frontend
+
+```bash
+npm run dev      # Desarrollo (hot reload)
+npm run build    # Build para producción
+npm run preview  # Vista previa del build
+```
+
+---
+
+## 8. Estructura del proyecto
+
+```
+Heladeria_Conejito/
+├── database/           # Esquema SQL (PostgreSQL)
+├── backend/
+│   └── backend/        # Spring Boot (Java 21)
+│       └── src/main/
+│           ├── java/.../
+│           │   ├── controller/   # APIs REST
+│           │   ├── service/      # Lógica de negocio
+│           │   ├── repository/   # Acceso a datos
+│           │   ├── model/        # Entidades JPA
+│           │   ├── dto/          # Objetos de transferencia
+│           │   ├── security/     # JWT + filtros
+│           │   └── config/       # Configuración general
+│           └── resources/
+│               └── application.properties
+├── frontend/           # React + Vite + Tailwind
+│   └── src/
+│       ├── pages/      # Páginas de la aplicación
+│       ├── context/    # Contextos globales (auth, carrito)
+│       ├── services/   # Llamadas a la API
+│       ├── app/        # Componentes base (Navbar, Footer, etc.)
+│       └── ...
+├── PRIMEROS_PASOS.me   # Esta guía
+└── README.md           # Documentación completa
+```

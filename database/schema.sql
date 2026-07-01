@@ -223,5 +223,7 @@ INSERT INTO promocion (titulo, descripcion, descuento, dias_vigencia, icono, col
 ('Sabor del Mes', 'Prueba nuestro sabor especial del mes y llévate el segundo medio cono a mitad de precio.', '50% OFF', 'Todo el mes', 'Tag', 'from-[#ec4899] to-[#f472b6]', TRUE);
 
 -- Usuario administrador por defecto (password: admin123)
+-- NOTA: Al iniciar el backend, si no existe un admin, se crea automáticamente
+-- con email: admin@gmail.com y password: admin123 (ver DataInitializer.java)
 INSERT INTO usuario (nombre, email, password_hash, rol) VALUES
-('Administrador', 'admin@heladeria.pe', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36PQm4sEPhMNPfFhpYN76uO', 'ADMIN');
+('Administrador', 'admin@gmail.com', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36PQm4sEPhMNPfFhpYN76uO', 'ADMIN');

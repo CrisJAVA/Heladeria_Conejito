@@ -16,6 +16,7 @@ export default function RegisterPage() {
     direccion: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,7 @@ export default function RegisterPage() {
     if (!form.password) return "La contraseña es obligatoria";
     if (form.password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
     if (form.password !== form.confirmPassword) return "Las contraseñas no coinciden";
+    if (!termsAccepted) return "Debes aceptar los términos y condiciones";
     return null;
   };
 
@@ -181,6 +183,26 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-[#ff6b9d] focus:ring-[#ff6b9d] accent-[#ff6b9d]"
+              />
+              <span className="text-sm text-gray-600">
+                Acepto los{" "}
+                <a
+                  href="/terminos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#ff6b9d] hover:underline font-medium"
+                >
+                  términos y condiciones
+                </a>
+              </span>
+            </label>
 
             <button
               type="submit"

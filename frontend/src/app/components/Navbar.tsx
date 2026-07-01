@@ -157,6 +157,7 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/menu")}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-shadow"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -244,7 +245,10 @@ export default function Navbar() {
                   <span className="w-5 h-5 bg-[#ff6b9d] text-white text-[10px] font-bold flex items-center justify-center rounded-full">{totalItems}</span>
                 )}
               </button>
-              <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4">
+              <button
+                onClick={() => { navigate("/menu"); setIsOpen(false); }}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium shadow-lg mt-4"
+              >
                 <ShoppingBag className="w-5 h-5" />
                 Pedir Ahora
               </button>

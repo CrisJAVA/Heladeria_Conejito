@@ -1,7 +1,10 @@
 import { motion } from "motion/react";
 import { IceCream, Pizza } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff5f7] via-[#fffbf7] to-[#f0f9ff]">
       {/* Background decorative elements */}
@@ -71,6 +74,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/menu")}
                 className="px-8 py-4 bg-gradient-to-r from-[#ff6b9d] to-[#ff8fab] text-white rounded-full font-medium text-lg shadow-lg hover:shadow-xl transition-shadow"
               >
                 Ver Menú
@@ -78,6 +82,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/menu")}
                 className="px-8 py-4 bg-white text-[#ff6b9d] rounded-full font-medium text-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-[#ff6b9d]"
               >
                 Pedir Ahora
