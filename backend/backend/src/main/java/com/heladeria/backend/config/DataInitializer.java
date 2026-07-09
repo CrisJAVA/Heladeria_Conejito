@@ -49,6 +49,15 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        // Inicializar CORE data (idempotente)
+        inicializarNivelesFidelizacion();
+        inicializarCategorias();
+        inicializarMetodosPago();
+        inicializarMetodosEntrega();
+        inicializarSeccionesLanding();
+        inicializarPromociones();
+
+        // Admin y clientes
         if (!usuarioRepository.existsByEmail("admin@gmail.com")) {
             Usuario admin = new Usuario();
             admin.setNombre("Administrador");
@@ -73,98 +82,17 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(cliente);
         }
 
-        // --- Clientes ficticios con niveles ---
+        // Inicializar clientes ficticios si los niveles ya existen
         if (nivelFidelizacionRepository.count() > 0) {
-            NivelFidelizacion bronce = nivelFidelizacionRepository.findByNombre("Bronce").orElse(null);
-            NivelFidelizacion plata = nivelFidelizacionRepository.findByNombre("Plata").orElse(null);
-            NivelFidelizacion oro = nivelFidelizacionRepository.findByNombre("Oro").orElse(null);
-            NivelFidelizacion diamante = nivelFidelizacionRepository.findByNombre("Diamante").orElse(null);
-
-            String[][] fakeUsers = {
-                {"María García", "maria@email.com", "987654321", "Jr. Lima 456, Ica", "Plata", "350", "450"},
-                {"Carlos López", "carlos@email.com", "976543210", "Av. Grau 789, Ica", "Oro", "520", "1200"},
-                {"Ana Martínez", "ana@email.com", "965432109", "Calle Real 321, Ica", "Diamante", "850", "2500"},
-                {"Pedro Sánchez", "pedro@email.com", "954321098", "Av. Los Maestros 111, Ica", "Plata", "200", "380"},
-                {"Lucía Torres", "lucia@email.com", "943210987", "Jr. Ayacucho 222, Ica", "Bronce", "45", "80"},
-                {"Roberto Díaz", "roberto@email.com", "932109876", "Av. Municipalidad 333, Ica", "Oro", "600", "1500"},
-            };
-
-            for (String[] f : fakeUsers) {
-                if (!usuarioRepository.existsByEmail(f[1])) {
-                    Usuario u = new Usuario();
-                    u.setNombre(f[0]);
-                    u.setEmail(f[1]);
-                    u.setPasswordHash(passwordEncoder.encode("cliente123"));
-                    u.setRol("CLIENTE");
-                    u.setAuthProvider("EMAIL");
-                    u.setActivo(true);
-                    u.setTelefono(f[2]);
-                    u.setDireccion(f[3]);
-                    usuarioRepository.save(u);
-
-                    NivelFidelizacion nivel = switch (f[4]) {
-                        case "Plata" -> plata;
-                        case "Oro" -> oro;
-                        case "Diamante" -> diamante;
-                        default -> bronce;
-                    };
-
-                    Puntos puntos = new Puntos();
-                    puntos.setUsuario(u);
-                    puntos.setPuntosActuales(Integer.parseInt(f[5]));
-                    puntos.setPuntosAcumulados(Integer.parseInt(f[6]));
-                    puntos.setNivel(nivel);
-                    puntosRepository.save(puntos);
-                }
-            }
+            inicializarFakeClientes();
         }
 
-        // --- Métodos de entrega ---
-        if (metodoEntregaRepository.count() == 0) {
-            MetodoEntrega recojo = new MetodoEntrega();
-            recojo.setNombre("Recojo en tienda");
-            recojo.setDescripcion("Recoge tu pedido en nuestro local");
-            recojo.setCosto(BigDecimal.ZERO);
-            metodoEntregaRepository.save(recojo);
+        // Productos
+        inicializarProductos();
+    }
 
-            MetodoEntrega delivery = new MetodoEntrega();
-            delivery.setNombre("Delivery");
-            delivery.setDescripcion("Entrega a domicilio");
-            delivery.setCosto(new BigDecimal("8.00"));
-            metodoEntregaRepository.save(delivery);
-        }
-
-        // --- Métodos de pago ---
-        if (metodoPagoRepository.count() == 0) {
-            for (String[] p : new String[][]{
-                {"Yape", "smartphone"},
-                {"Plin", "qr-code"},
-                {"Tarjeta", "credit-card"},
-                {"Efectivo", "banknote"}
-            }) {
-                MetodoPago mp = new MetodoPago();
-                mp.setNombre(p[0]);
-                mp.setIcono(p[1]);
-                metodoPagoRepository.save(mp);
-            }
-        }
-
-        // --- Categorías ---
-        if (categoriaRepository.count() == 0) {
-            for (String[] c : new String[][]{
-                {"Helados", "Helados suaves y cremosos en cono, perfectos para cualquier momento"},
-                {"Raspadillas", "Refrescantes, frías y llenas de sabor"},
-                {"Bebidas", "Tradicionales y refrescantes, ideales para acompañar"},
-                {"Pizzas", "Deliciosas, calientes y perfectas para compartir en familia o con amigos"}
-            }) {
-                Categoria cat = new Categoria();
-                cat.setNombre(c[0]);
-                cat.setDescripcion(c[1]);
-                categoriaRepository.save(cat);
-            }
-        }
-
-        // --- Niveles de fidelización ---
+    @Transactional
+    public void inicializarNivelesFidelizacion() {
         if (nivelFidelizacionRepository.count() == 0) {
             for (Object[] n : new Object[][]{
                 {"Bronce", 0, 5, "#cd7f32"},
@@ -180,48 +108,92 @@ public class DataInitializer implements CommandLineRunner {
                 nivelFidelizacionRepository.save(nivel);
             }
         }
+    }
 
-        // --- Productos ---
-        if (productoRepository.count() == 0) {
-            Categoria helados = categoriaRepository.findByNombre("Helados").orElse(null);
-            Categoria raspadillas = categoriaRepository.findByNombre("Raspadillas").orElse(null);
-            Categoria bebidas = categoriaRepository.findByNombre("Bebidas").orElse(null);
-            Categoria pizzas = categoriaRepository.findByNombre("Pizzas").orElse(null);
-
-            java.util.function.Function<String, String> img = t -> "https://placehold.co/400x300/ffd9df/a43756?text=" + t;
-
-            // --- HELADOS (en cono) ---
-            if (helados != null) {
-                guardarProducto(helados, "Chocolate", "Helado suave y cremoso en cono", 7.00, 50, true, true, img.apply("Helado+Chocolate"));
-                guardarProducto(helados, "Vainilla", "Helado suave y cremoso en cono", 7.00, 50, true, true, img.apply("Helado+Vainilla"));
-            }
-
-            // --- RASPADILLAS ---
-            if (raspadillas != null) {
-                guardarProducto(raspadillas, "Raspadilla de Lúcuma", "Sabor tradicional y cremoso", 5.00, 80, true, true, img.apply("Raspadilla+Lucuma"));
-                guardarProducto(raspadillas, "Raspadilla de Fresa", "Dulce y frutal, ideal para refrescarte", 5.00, 80, true, true, img.apply("Raspadilla+Fresa"));
-                guardarProducto(raspadillas, "Raspadilla de Coco", "Suave, tropical y delicioso", 5.00, 60, true, false, img.apply("Raspadilla+Coco"));
-                guardarProducto(raspadillas, "Raspadilla de Menta", "Fresca y aromática, perfecta para el calor", 5.00, 60, true, false, img.apply("Raspadilla+Menta"));
-                guardarProducto(raspadillas, "Raspadilla de Maracuyá", "Tropical y ligeramente ácida", 5.00, 70, true, true, img.apply("Raspadilla+Maracuya"));
-                guardarProducto(raspadillas, "Raspadilla de Piña", "Dulce y tropical, llena de frescura", 5.00, 70, true, false, img.apply("Raspadilla+Pina"));
-                guardarProducto(raspadillas, "Raspadilla de Limón", "Cítrica y refrescante", 5.00, 75, true, true, img.apply("Raspadilla+Limon"));
-                guardarProducto(raspadillas, "Raspadilla de Chicha", "Sabor tradicional con un toque único", 5.00, 65, true, true, img.apply("Raspadilla+Chicha"));
-            }
-
-            // --- BEBIDAS ---
-            if (bebidas != null) {
-                guardarProducto(bebidas, "Chicha Morada Helada", "Bebida tradicional peruana a base de maíz morado", 7.00, 100, true, true, img.apply("Chicha+Morada"));
-            }
-
-            // --- PIZZAS ---
-            if (pizzas != null) {
-                guardarProducto(pizzas, "Pizza Personal", "Ideal para una persona. Práctica y deliciosa", 18.00, 30, true, true, img.apply("Pizza+Personal"));
-                guardarProducto(pizzas, "Pizza Mediana", "Perfecta para compartir entre 3 a 4 personas", 32.00, 25, true, true, img.apply("Pizza+Mediana"));
-                guardarProducto(pizzas, "Pizza Familiar", "Para compartir en grande. Ideal para 5 a 6 personas", 45.00, 20, true, true, img.apply("Pizza+Familiar"));
+    @Transactional
+    public void inicializarCategorias() {
+        if (categoriaRepository.count() == 0) {
+            for (String[] c : new String[][]{
+                {"Helados", "Helados suaves y cremosos en cono, perfectos para cualquier momento"},
+                {"Raspadillas", "Refrescantes, frías y llenas de sabor"},
+                {"Bebidas", "Tradicionales y refrescantes, ideales para acompañar"},
+                {"Pizzas", "Deliciosas, calientes y perfectas para compartir en familia o con amigos"}
+            }) {
+                Categoria cat = new Categoria();
+                cat.setNombre(c[0]);
+                cat.setDescripcion(c[1]);
+                categoriaRepository.save(cat);
             }
         }
+    }
 
-        // --- Promociones ---
+    @Transactional
+    public void inicializarMetodosPago() {
+        if (metodoPagoRepository.count() == 0) {
+            for (String[] p : new String[][]{
+                {"Yape", "smartphone"},
+                {"Plin", "qr-code"},
+                {"Tarjeta", "credit-card"},
+                {"Efectivo", "banknote"}
+            }) {
+                MetodoPago mp = new MetodoPago();
+                mp.setNombre(p[0]);
+                mp.setIcono(p[1]);
+                metodoPagoRepository.save(mp);
+            }
+        }
+    }
+
+    @Transactional
+    public void inicializarMetodosEntrega() {
+        if (metodoEntregaRepository.count() == 0) {
+            MetodoEntrega recojo = new MetodoEntrega();
+            recojo.setNombre("Recojo en tienda");
+            recojo.setDescripcion("Recoge tu pedido en nuestro local");
+            recojo.setCosto(BigDecimal.ZERO);
+            metodoEntregaRepository.save(recojo);
+
+            MetodoEntrega delivery = new MetodoEntrega();
+            delivery.setNombre("Delivery");
+            delivery.setDescripcion("Entrega a domicilio");
+            delivery.setCosto(new BigDecimal("8.00"));
+            metodoEntregaRepository.save(delivery);
+        }
+    }
+
+    @Transactional
+    public void inicializarSeccionesLanding() {
+        if (seccionLandingRepository.count() == 0) {
+            for (Object[] s : new Object[][]{
+                {"helados", "Helados Artesanales", "Suaves y cremosos en cono, preparados al momento",
+                 "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+                 "#ff6b9d", "#ff8fab"},
+                {"raspadillas", "Raspadillas Refrescantes", "8 sabores tradicionales para combatir el calor de Ica",
+                 "https://images.unsplash.com/photo-1718810125230-e8e2271354f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+                 "#ffd93d", "#ffed4e"},
+                {"pizzas", "Pizzas Artesanales", "Personal, mediana o familiar, horneadas al momento",
+                 "https://images.unsplash.com/photo-1513104890138-7c749659a591?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+                 "#a7e4f2", "#c3ecf6"},
+                {"chicha", "Chicha Morada Helada", "La bebida tradicional peruana, siempre fría y deliciosa",
+                 "https://images.unsplash.com/photo-1629385697093-57be2cc97fa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+                 "#c8b6ff", "#dac9ff"},
+            }) {
+                if (!seccionLandingRepository.existsBySectionKey((String) s[0])) {
+                    SeccionLanding sec = new SeccionLanding();
+                    sec.setSectionKey((String) s[0]);
+                    sec.setTitulo((String) s[1]);
+                    sec.setDescripcion((String) s[2]);
+                    sec.setImagenUrl((String) s[3]);
+                    sec.setColorFrom((String) s[4]);
+                    sec.setColorTo((String) s[5]);
+                    seccionLandingRepository.save(sec);
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void inicializarPromociones() {
         if (promocionRepository.count() == 0) {
             for (Object[] p : new Object[][]{
                 {"2x1 en Conos", "Todos los lunes y martes, llévate 2 conos del sabor que quieras por el precio de 1.", "2x1", "Lun - Mar", "ice-cream", "#ff6b9d"},
@@ -241,31 +213,88 @@ public class DataInitializer implements CommandLineRunner {
                 promocionRepository.save(promo);
             }
         }
+    }
 
-        // --- Secciones Landing Page ---
-        if (seccionLandingRepository.count() == 0) {
-            for (Object[] s : new Object[][]{
-                {"helados", "Helados Artesanales", "Suaves y cremosos en cono, preparados al momento",
-                 "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-                 "#ff6b9d", "#ff8fab"},
-                {"raspadillas", "Raspadillas Refrescantes", "8 sabores tradicionales para combatir el calor de Ica",
-                 "https://images.unsplash.com/photo-1718810125230-e8e2271354f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-                 "#ffd93d", "#ffed4e"},
-                {"pizzas", "Pizzas Artesanales", "Personal, mediana o familiar, horneadas al momento",
-                 "https://images.unsplash.com/photo-1513104890138-7c749659a591?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-                 "#a7e4f2", "#c3ecf6"},
-                {"chicha", "Chicha Morada Helada", "La bebida tradicional peruana, siempre fría y deliciosa",
-                 "https://images.unsplash.com/photo-1629385697093-57be2cc97fa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-                 "#c8b6ff", "#dac9ff"},
-            }) {
-                SeccionLanding sec = new SeccionLanding();
-                sec.setSectionKey((String) s[0]);
-                sec.setTitulo((String) s[1]);
-                sec.setDescripcion((String) s[2]);
-                sec.setImagenUrl((String) s[3]);
-                sec.setColorFrom((String) s[4]);
-                sec.setColorTo((String) s[5]);
-                seccionLandingRepository.save(sec);
+    @Transactional
+    public void inicializarFakeClientes() {
+        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
+        NivelFidelizacion plata = nivelFidelizacionRepository.findFirstByNombre("Plata").orElse(null);
+        NivelFidelizacion oro = nivelFidelizacionRepository.findFirstByNombre("Oro").orElse(null);
+        NivelFidelizacion diamante = nivelFidelizacionRepository.findFirstByNombre("Diamante").orElse(null);
+
+        String[][] fakeUsers = {
+            {"María García", "maria@email.com", "987654321", "Jr. Lima 456, Ica", "Plata", "350", "450"},
+            {"Carlos López", "carlos@email.com", "976543210", "Av. Grau 789, Ica", "Oro", "520", "1200"},
+            {"Ana Martínez", "ana@email.com", "965432109", "Calle Real 321, Ica", "Diamante", "850", "2500"},
+            {"Pedro Sánchez", "pedro@email.com", "954321098", "Av. Los Maestros 111, Ica", "Plata", "200", "380"},
+            {"Lucía Torres", "lucia@email.com", "943210987", "Jr. Ayacucho 222, Ica", "Bronce", "45", "80"},
+            {"Roberto Díaz", "roberto@email.com", "932109876", "Av. Municipalidad 333, Ica", "Oro", "600", "1500"},
+        };
+
+        for (String[] f : fakeUsers) {
+            if (!usuarioRepository.existsByEmail(f[1])) {
+                Usuario u = new Usuario();
+                u.setNombre(f[0]);
+                u.setEmail(f[1]);
+                u.setPasswordHash(passwordEncoder.encode("cliente123"));
+                u.setRol("CLIENTE");
+                u.setAuthProvider("EMAIL");
+                u.setActivo(true);
+                u.setTelefono(f[2]);
+                u.setDireccion(f[3]);
+                usuarioRepository.save(u);
+
+                NivelFidelizacion nivel = switch (f[4]) {
+                    case "Plata" -> plata;
+                    case "Oro" -> oro;
+                    case "Diamante" -> diamante;
+                    default -> bronce;
+                };
+
+                Puntos puntos = new Puntos();
+                puntos.setUsuario(u);
+                puntos.setPuntosActuales(Integer.parseInt(f[5]));
+                puntos.setPuntosAcumulados(Integer.parseInt(f[6]));
+                puntos.setNivel(nivel);
+                puntosRepository.save(puntos);
+            }
+        }
+    }
+
+        @Transactional
+    public void inicializarProductos() {
+        if (productoRepository.count() == 0) {
+            Categoria helados = categoriaRepository.findFirstByNombre("Helados").orElse(null);
+            Categoria raspadillas = categoriaRepository.findFirstByNombre("Raspadillas").orElse(null);
+            Categoria bebidas = categoriaRepository.findFirstByNombre("Bebidas").orElse(null);
+            Categoria pizzas = categoriaRepository.findFirstByNombre("Pizzas").orElse(null);
+
+            java.util.function.Function<String, String> img = t -> "https://placehold.co/400x300/ffd9df/a43756?text=" + t;
+
+            if (helados != null) {
+                guardarProducto(helados, "Chocolate", "Helado suave y cremoso en cono", 7.00, 50, true, true, img.apply("Helado+Chocolate"));
+                guardarProducto(helados, "Vainilla", "Helado suave y cremoso en cono", 7.00, 50, true, true, img.apply("Helado+Vainilla"));
+            }
+
+            if (raspadillas != null) {
+                guardarProducto(raspadillas, "Raspadilla de Lúcuma", "Sabor tradicional y cremoso", 5.00, 80, true, true, img.apply("Raspadilla+Lucuma"));
+                guardarProducto(raspadillas, "Raspadilla de Fresa", "Dulce y frutal, ideal para refrescarte", 5.00, 80, true, true, img.apply("Raspadilla+Fresa"));
+                guardarProducto(raspadillas, "Raspadilla de Coco", "Suave, tropical y delicioso", 5.00, 60, true, false, img.apply("Raspadilla+Coco"));
+                guardarProducto(raspadillas, "Raspadilla de Menta", "Fresca y aromática, perfecta para el calor", 5.00, 60, true, false, img.apply("Raspadilla+Menta"));
+                guardarProducto(raspadillas, "Raspadilla de Maracuyá", "Tropical y ligeramente ácida", 5.00, 70, true, true, img.apply("Raspadilla+Maracuya"));
+                guardarProducto(raspadillas, "Raspadilla de Piña", "Dulce y tropical, llena de frescura", 5.00, 70, true, false, img.apply("Raspadilla+Pina"));
+                guardarProducto(raspadillas, "Raspadilla de Limón", "Cítrica y refrescante", 5.00, 75, true, true, img.apply("Raspadilla+Limon"));
+                guardarProducto(raspadillas, "Raspadilla de Chicha", "Sabor tradicional con un toque único", 5.00, 65, true, true, img.apply("Raspadilla+Chicha"));
+            }
+
+            if (bebidas != null) {
+                guardarProducto(bebidas, "Chicha Morada Helada", "Bebida tradicional peruana a base de maíz morado", 7.00, 100, true, true, img.apply("Chicha+Morada"));
+            }
+
+            if (pizzas != null) {
+                guardarProducto(pizzas, "Pizza Personal", "Ideal para una persona. Práctica y deliciosa", 18.00, 30, true, true, img.apply("Pizza+Personal"));
+                guardarProducto(pizzas, "Pizza Mediana", "Perfecta para compartir entre 3 a 4 personas", 32.00, 25, true, true, img.apply("Pizza+Mediana"));
+                guardarProducto(pizzas, "Pizza Familiar", "Para compartir en grande. Ideal para 5 a 6 personas", 45.00, 20, true, true, img.apply("Pizza+Familiar"));
             }
         }
     }
