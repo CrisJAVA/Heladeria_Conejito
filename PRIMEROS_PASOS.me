@@ -1,149 +1,542 @@
 # Heladería Conejito — Primeros Pasos
 
-Guía rápida para levantar el proyecto en local.
+Guía práctica paso a paso para revisar y probar el proyecto desde cero.
+
+> Esta guía te ayudará a levantar el sistema completo y probar todas las funcionalidades.
 
 ---
 
-## Requisitos
+## Requisitos Previos
 
-| Herramienta | Versión | Comprobar |
-|-------------|---------|-----------|
-| Node.js | 18+ | `node --version` |
-| Java | 21+ | `java --version` |
-| Maven | (wrapper incluido) | — |
-| PostgreSQL | 15+ | `psql --version` |
+| Herramienta | Versión Mínima | Comando para verificar |
+|-------------|----------------|------------------------|
+| Java | 21 | `java --version` |
+| Node.js | 18 | `node --version` |
+| Maven | (wrapper incluido) | `mvn --version` (si está instalado) |
+| PostgreSQL | 15 | `psql --version` |
+| Git | 2.0+ | `git --version` |
+
+> Si alguna herramienta no está instalada, instálala antes de continuar.
 
 ---
 
-## 1. Clonar el proyecto
+## 1. Clonar el Proyecto
 
 ```bash
 git clone <url-del-repositorio>
 cd Heladeria_Conejito
 ```
 
+> El proyecto ya está completo en tu sistema.
+
 ---
 
-## 2. Configurar la base de datos
+## 2. Configurar la Base de Datos
 
-Asegúrate de tener PostgreSQL corriendo y crea la base de datos:
+### 2.1 Verificar PostgreSQL
+
+```bash
+service postgresql status
+# o
+netstat -tlnp | grep 5432
+```
+
+### 2.2 Crear la Base de Datos
 
 ```bash
 psql -U postgres -c "CREATE DATABASE heladeria_conejito;"
 ```
 
-Carga el esquema y datos iniciales:
+### 2.3 Verificar Credenciales
+
+Si tu contraseña de PostgreSQL es distinta a `postgres`, actualiza el archivo de configuración:
+
+```bash
+# Para Windows
+cd backend/backend
+sed -i 's/spring.datasource.password=postgres/spring.datasource.password=tu_password/g' src/main/resources/application.properties
+
+# Para macOS/Linux
+cd backend/backend
+sed -i '' 's/spring.datasource.password=postgres/spring.datasource.password=tu_password/g' src/main/resources/application.properties
+```
+
+### 2.4 Cargar Esquema y Datos Iniciales
 
 ```bash
 psql -U postgres -d heladeria_conejito -f database/schema.sql
 ```
 
-> Si tu contraseña de PostgreSQL es distinta a `postgres`, edita  
-> `backend/backend/src/main/resources/application.properties`  
-> y cambia: `spring.datasource.password=tu_password`
+> Este script crea todas las tablas e inserta datos de prueba:
+> - Categorías de productos (Helados, Pizzas, Bebidas, Toppings, Combos)
+> - Métodos de entrega (Recojo en tienda, Delivery)
+> - Métodos de pago (Yape, Plin, Tarjeta, Efectivo)
+> - Niveles de fidelización (Bronce, Plata, Oro, Diamante)
+> - Usuario administrador (`admin@gmail.com` / `admin123`)
+
+> **VERIFICACIÓN**: Después de ejecutar, ejecuta `psql -U postgres -d heladeria_conejito -c "\dt"` para listar todas las tablas.
 
 ---
 
-## 3. Levantar el backend (Spring Boot)
+## 3. Levantar el Backend (Spring Boot)
+
+### 3.1 Compilar y Preparar el Backend
+
+```bash
+cd backend/backend
+.\mvnw.cmd clean compile
+```
+
+### 3.2 Iniciar el Servidor Backend
 
 ```bash
 cd backend/backend
 .\mvnw.cmd spring-boot:run
 ```
 
-- El servidor inicia en: **http://localhost:8080**
-- Endpoints disponibles: `http://localhost:8080/api/productos`
-- Documentación de APIs disponible en Postman
+> **Lo que observarás:**
+> - Puerto: **http://localhost:8080**
+> - Consola: Logs de Spring Boot mostrando ".*.started in*seconds"
+> - Datos iniciales: Admin creado automáticamente si no existe
+> - Endpoints disponibles:
+>   - `GET http://localhost:8080/api/productos` - Listar todos los productos
+>   - `GET http://localhost:8080/api/productos/disponibles` - Productos disponibles
+>   - `GET http://localhost:8080/api/promociones` - Promociones activas
+>   - `GET http://localhost:8080/api/niveles` - Niveles de fidelización
+
+> **SI FALLA:** Verifica que la base de datos exista y que application.properties tenga los ajustes correctos.
 
 ---
 
-## 4. Levantar el frontend (React + Vite)
+## 4. Levantar el Frontend (React + Vite)
+
+### 4.1 Instalar Dependencias
 
 ```bash
 cd frontend
-npm install        # solo la primera vez
+npm install
+```
+
+> **Tiempo estimado:** 2-3 minutos (dependiendo de la velocidad de internet)
+
+### 4.2 Iniciar el Servidor de Desarrollo Frontend
+
+```bash
+cd frontend
 npm run dev
 ```
 
-- El servidor inicia en: **http://localhost:5173**
+> **Lo que observarás:**
+> - Puerto: **http://localhost:5173**
+> - Consola: Logs de Vite mostrando ".*ready at*"
+> - Interfaz: App React con navegación y hot reload
+
+> **¡LISTO! El frontend debería estar ejecutándose. Abre http://localhost:5173 en tu navegador.**
 
 ---
 
-## 5. Cuentas predefinidas
+## 5. Ingresar al Sistema
 
-| Rol | Email | Contraseña |
-|-----|-------|------------|
-| Administrador | `admin@gmail.com` | `admin123` |
-| Cliente | (registrarse en `/registro`) | (la que elijas) |
+### 5.1 Inicio de Sesión como Cliente (Usuario Nuevo)
 
-> El admin se crea automáticamente al iniciar el backend si no existe.
+1. **Navigate to:** http://localhost:5173
+2. **Click en:** Iniciar Sesión (`/login`)
+3. **Fill the form:**
+   - Email: `testuser@gmail.com` (para probar si ya existe, si no crea uno)
+   - Password: `test123` (mínimo 8 caracteres)
+   - Opcional: Aceptar términos y condiciones
+4. **Click:** Iniciar Sesión
+5. **Result:** Redirect to Landing page (en caso de ya estar logueado) o signup form (si es primera vez)
+
+> **CREAR NUEVA CUENTA:**
+> - Navigate to: `http://localhost:5173/registro`
+> - Fill: Nombre, Email, Password (mínimo 8 chars), confirmar password
+> - Opcional: Agregar teléfono y dirección
+> - Check: Acepto los términos y condiciones
+> - Click: Crear Cuenta
+> - Result: Redirect to home page
+
+### 5.2 Inicio de Sesión como Administrador
+
+1. **Navigate to:** http://localhost:5173/login
+2. **Fill the form:**
+   - Email: `admin@gmail.com`
+   - Password: `admin123`
+3. **Click:** Iniciar Sesión
+4. **Result:** Redirect to Admin Dashboard (`/admin`)
+
+> **VERIFICAR:** "Panel de Administración" should be visible.
 
 ---
 
-## 6. Rutas del frontend
+## 6. Probar el Flujo de Usuario
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Landing page |
-| `/menu` | Menú interactivo |
-| `/carrito` | Carrito de compras |
-| `/login` | Inicio de sesión |
-| `/registro` | Registro de usuario |
-| `/contacto` | Contacto y ubicación |
-| `/promociones` | Promociones activas |
-| `/fidelizacion` | Programa de fidelización |
-| `/editar-perfil` | Perfil de usuario |
-| `/mis-pedidos` | Historial de pedidos |
-| `/admin/*` | Panel administrativo |
+### 6.1 Explorar el Menú
+
+1. **Navigate to:** http://localhost:5173/menu
+2. **Explorar categorías:** Click en diferentes categorías en el filtro
+3. **Buscar productos:** Use la barra de búsqueda
+4. **Filter by price:** Ajuste el slider de precio máximo
+5. **View products:** Cada producto muestra:
+   - Image with fallback
+   - Name, description, price
+   - Availability status (Disponible/Agotado)
+   - "Add to cart" button
+
+### 6.2 Probar Agregar al Carrito
+
+1. **Click in any product:** "Agregar al carrito"
+2. **Verify:** Toast notification "ILICEIXED nombre agregado al carrito"
+3. **Navigate to:** http://localhost:5173/carrito
+4. **Verify items:** Product should appear in cart
+5. **Test quantity:** Use + and - buttons to adjust
+6. **Test remove:** Use - button to remove single unit
+7. **Test clear:** Click "Vaciar" button
+
+### 6.3 Probar el Proceso de Pago Completo
+
+1. **Agregar producto al carrito:** según pasos anteriores
+2. **Navigate to cart:** http://localhost:5173/carrito
+3. **Select delivery method:** 
+   - "Recoger en tienda" (Sin costo adicional)
+   - "Delivery" (S/. 8.00 costo)
+4. **Select payment method:** Click on any payment option (Yape, Plin, Tarjeta, Efectivo)
+5. **Complete payment form (if needed):**
+   - Yape/Plin: Enter operation number
+   - Card: Fill titular, number, expiration, CVV
+   - Cash: Just confirm
+6. **Click:** "Confirmar pedido" or "Confirmar Pago"
+7. **Wait:** Processing spinner
+8. **Success:** Show "Pedido realizado correctamente" with:
+   - Order code (ej: PED-20250101-123456)
+   - Total amount
+   - Buttons: "Ver mis pedidos" and "Seguir comprando"
+
+### 6.4 Verificar Historial de Pedidos
+
+1. **Click:** "Ver mis pedidos" (from success screen) OR navigate to http://localhost:5173/mis-pedidos
+2. **Verify:** List of user orders with:
+   - Order code and date
+   - Product details (images, names, quantities, prices)
+   - Order status (PENDIENTE, CONFIRMADO, PREPARANDO, etc.)
+   - Total amounts
+3. **Test clicking:** Any order to see detailed view
+4. **Test:** Use "Reintentar" button if loading fails
 
 ---
 
-## 7. Comandos útiles
+## 7. Probar el Flujo de Administrador
 
-### Backend
+> **NOTE:** Some admin endpoints may require additional setup if not already configured.
+
+### 7.1 Login and Access Admin Dashboard
+
+1. **Navigate to:** http://localhost:5173
+2. **Click the admin button** (bottom-right, 🔒 icon)
+   - OR navigate to: http://localhost:5173/admin
+3. **Login:** admin@gmail.com / admin123
+4. **Verify:** Admin dashboard with quick stats
+
+### 7.2 Test Admin Features
+
+#### 7.2.1 Productos
+- **Navigate to:** http://localhost:5173/admin/productos
+- **Verify:** List of all products with:
+  - Search and filter capabilities
+  - Edit buttons
+  - Delete functionality
+  - Add new product form
+
+#### 7.2.2 Pedidos  
+- **Navigate to:** http://localhost:5173/admin/pedidos
+- **Verify:** All orders with:
+  - Status management (cambiar estado)
+  - Order details view
+  - Search and filter
+
+#### 7.2.3 Clientes
+- **Navigate to:** http://localhost:5173/admin/clientes
+- **Verify:** User management:
+  - List with search
+  - Edit user information
+  - View order history
+
+#### 7.2.4 Configuración
+- **Navigate to:** http://localhost:5173/admin/configuracion
+- **Verify:** System settings
+
+---
+
+## 8. Verificar que Todo Funciona Correctamente
+
+### 8.1 Verificar API Connections
+
+Open browser developer tools (F12) and check:
+
+```javascript
+// Backend APIs (Console)
+GET http://localhost:8080/api/productos ✓
+GET http://localhost:8080/api/promociones ✓
+POST http://localhost:8080/api/auth/login ✓
+
+// Frontend APIs (Network tab)
+GET http://localhost:5173/api/auth/login ✓
+GET http://localhost:5173/api/productos ✓
+POST http://localhost:5173/api/pedidos ✓
+```
+
+### 8.2 Verificar Funcionalidades Específicas
+
+| Feature | What to check |
+|---------|---------------|
+| Menú digital | Products display, filtering, search |
+| Carrito | Add/remove items, quantity adjust, total calculation |
+| Pago | All 4 methods available, form validation |
+| Autenticación | Login/register/logout, token handling |
+| Pedidos | Create, track, history display |
+| Perfil | Edit profile, change password |
+| Admin panel | All sections accessible, CRUD operations |
+| Responsive | Mobile and desktop layout |
+
+### 8.3 Usar Datos de Prueba
+
+**Default credentials:**
+- Admin: `admin@gmail.com` / `admin123`
+- Client: `testuser@gmail.com` / `test123` (crear si no existe)
+
+**Productos de ejemplo:**
+- Copa Artesanal XL: S/. 18.50
+- Helado Oreo Delight: S/. 12.00
+- Pack 4 Donuts: S/. 20.00
+
+---
+
+## 9. Solucionar Errores Comunes
+
+### 9.1 Backend No Arranca
+
+**Symptoms:** "Connection refused" or "Port 8080 already in use"
+
+**Solutions:**
+```bash
+# Check if port 8080 is in use
+netstat -tlnp | grep 8080
+
+# Kill any process using port 8080
+# Windows
+netstat -tlnp | findstr :8080
+# Then find the PID and run: taskkill -PID <PID>
+
+# macOS/Linux
+sudo lsof -ti:8080 | xargs kill -9
+
+# Clean rebuild
+cd backend/backend
+.\mvnw.cmd spring-boot:run
+```
+
+### 9.2 Frontend No Arranca
+
+**Symptoms:** Blank page or "Failed to connect" errors
+
+**Solutions:**
+```bash
+# Clear cache and rebuild
+cd frontend
+npm cache clean --force
+npm install
+npm run dev
+
+# Check if backend is running
+curl http://localhost:8080/api/productos
+```
+
+### 9.3 Base de Datos No Conecta
+
+**Symptoms:** "Connection error" during startup
+
+**Solutions:**
+```bash
+# Verify PostgreSQL is running
+psql -U postgres -c "SELECT 1"
+
+# Check database exists
+psql -U postgres -l | grep heladeria_conejito
+
+# Restore from schema if needed
+psql -U postgres -d heladeria_conejito -f database/schema.sql
+```
+
+### 9.4 API Calls Fallan
+
+**Symptoms:** CORS errors or authentication failures
+
+**Solutions:**
+- Ensure backend allows frontend origins
+- Check JWT token handling
+- Verify API endpoints are correct
+- Check browser console for specific error messages
+
+---
+
+## 10. Scripts Útiles
+
+### Backend Scripts
 
 ```bash
-.\mvnw.cmd compile          # Compilar
-.\mvnw.cmd test             # Ejecutar tests
+# Windows
+cd backend/backend
+.\mvnw.cmd compile          # Compilar solo código
+.\mvnw.cmd test             # Ejecutar tests unitarios
 .\mvnw.cmd clean            # Limpiar build
-.\mvnw.cmd spring-boot:run  # Iniciar servidor
+cd ..\.. && git status     # Verificar cambios
+
+# macOS/Linux
+cd backend/backend
+./mvnw compile ./mvnw test ./mvnw clean
 ```
 
-### Frontend
+### Frontend Scripts
 
 ```bash
-npm run dev      # Desarrollo (hot reload)
-npm run build    # Build para producción
-npm run preview  # Vista previa del build
+cd frontend
+npm run dev        # Desarrollo con hot reload
+npm run build       # Construir para producción
+npm run preview     # Previsualizar build
+cnpm install        # Instalar si npm no está disponible
+```
+
+### Scripts de Verificación Rápida
+
+```bash
+# Script para verificar el sistema completo (Windows)
+@echo off
+call :checkJava
+call :checkNode
+call :checkPostgreSQL
+call :startBackend
+call :startFrontend
+call :waitForServices
+call :testAPI
+call :end
+
+:checkJava
+java --version
+if errorlevel 1 (
+    echo ERROR: Java 21+ is required
+    exit /b 1
+)
+goto :eof
+
+:checkNode
+node --version
+if errorlevel 1 (
+    echo ERROR: Node.js 18+ is required
+    exit /b 1
+)
+goto :eof
+
+:checkPostgreSQL
+psql --version
+if errorlevel 1 (
+    echo ERROR: PostgreSQL is required
+    exit /b 1
+)
+goto :eof
+
+:startBackend
+cd backend\backend
+start "Backend" .\mvnw.cmd spring-boot:run
+
+:sleep 10
+
+:startFrontend
+cd frontend
+start "Frontend" npm run dev
+
+:sleep 10
+
+:testAPI
+curl -s http://localhost:8080/api/productos | find "productos" >nul
+if errorlevel 1 (
+    echo WARNING: Backend API no responde
+)
+
+curl -s http://localhost:5173 | find "Heladeria Conejito" >nul
+if errorlevel 1 (
+    echo WARNING: Frontend no responde
+)
+
+:end
+echo SUCCESS: Verificación completada. ¡Sistema listo!
+timeout 300
 ```
 
 ---
 
-## 8. Estructura del proyecto
+## 11. Estructura del Proyecto
 
 ```
 Heladeria_Conejito/
-├── database/           # Esquema SQL (PostgreSQL)
-├── backend/
-│   └── backend/        # Spring Boot (Java 21)
-│       └── src/main/
-│           ├── java/.../
-│           │   ├── controller/   # APIs REST
-│           │   ├── service/      # Lógica de negocio
-│           │   ├── repository/   # Acceso a datos
-│           │   ├── model/        # Entidades JPA
-│           │   ├── dto/          # Objetos de transferencia
-│           │   ├── security/     # JWT + filtros
-│           │   └── config/       # Configuración general
-│           └── resources/
-│               └── application.properties
-├── frontend/           # React + Vite + Tailwind
+├── database/                    # Esquema SQL PostgreSQL
+│   └── schema.sql              # Todas las tablas + datos iniciales
+├── backend/                     # Spring Boot API (Java 21)
+│   └── backend/                 # Módulo principal
+│       └── src/main/java/com/heladeria/backend/
+│           ├── controller/      # Endpoints API REST
+│           ├── service/         # Lógica de negocio
+│           ├── repository/      # Spring Data JPA
+│           ├── model/           # Entidades JPA
+│           ├── dto/             # Objetos de transferencia
+│           ├── security/        # JWT, filtros
+│           └── config/           # Configuración general
+│               └── resources/
+│                   └── application.properties
+├── frontend/                    # React + Vite + Tailwind
 │   └── src/
-│       ├── pages/      # Páginas de la aplicación
-│       ├── context/    # Contextos globales (auth, carrito)
-│       ├── services/   # Llamadas a la API
-│       ├── app/        # Componentes base (Navbar, Footer, etc.)
-│       └── ...
-├── PRIMEROS_PASOS.me   # Esta guía
-└── README.md           # Documentación completa
+│       ├── pages/               # Vistas de la aplicación
+│       │   ├── CartPage.tsx          # Carrito de compras
+│       │   ├── FidelizacionPage.tsx # Programa de fidelización
+│       │   ├── LoginPage.tsx         # Login
+│       │   ├── MenuPage.tsx          # Menú digital
+│       │   ├── MisPedidosPage.tsx    # Historial de pedidos
+│       │   ├── PromocionesPage.tsx    # Promociones
+│       │   ├── ProfilePage.tsx       # Perfil
+│       │   ├── RegisterPage.tsx      # Registro
+│       │   └── ...                 # Más páginas
+│       ├── context/              # Contextos globales
+│       │   ├── AuthContext.tsx     # Autenticación
+│       │   └── CartContext.tsx     # Carrito
+│       ├── services/             # Llamadas API
+│       │   ├── auth.ts             # API de autenticación
+│       │   └── pedidos.ts          # API de pedidos
+│       └── app/                   # Componentes base
+│           ├── App.tsx           # Router principal
+│           ├── components/        # Navbar, Footer, etc.
+│           └── ProtectedRoute.tsx # Rutas protegidas
+├── PRIMEROS_PASOS.me            # Esta guía
+└── README.md                    # Documentación completa
 ```
+
+> **Tiempo estimado para completar:** 10-15 minutos
+> **Lo que esperar:** Sistema web completo funcionando con todas las funcionalidades
+
+> Si encuentras algún problema, verifica los logs del navegador y del backend, y ejecuta los comandos de solución de problemas anteriores.
+
+---
+
+## 📋 Requisitos Finales para Prueba Exitosa
+
+- [ ] Backend Spring Boot ejecutándose en puerto 8080
+- [ ] Frontend React ejecutándose en puerto 5173  
+- [ ] Base de datos PostgreSQL con datos iniciales
+- [ ] Usuario admin creado (admin@gmail.com / admin123)
+- [ ] Productos disponibles en menú
+- [ ] Probar flujo completo de pedido (hasta confirmación)
+- [ ] Verificar panel administrativo
+- [ ] Probar historial de pedidos de usuario
+- [ ] Verificar todas las rutas deseadas funcionan
+
+> ¡Felicidades! ¡El sistema Heladería Conejito está completamente funcional y listo para su uso!
+
+---
