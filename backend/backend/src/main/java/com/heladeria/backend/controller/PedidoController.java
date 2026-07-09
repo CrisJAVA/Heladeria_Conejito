@@ -1,7 +1,9 @@
 package com.heladeria.backend.controller;
 
+import com.heladeria.backend.dto.CambiarEstadoPedidoRequest;
 import com.heladeria.backend.dto.PedidoRequest;
 import com.heladeria.backend.dto.PedidoResponse;
+import com.heladeria.backend.exception.ForbiddenException;
 import com.heladeria.backend.security.UserPrincipal;
 import com.heladeria.backend.service.PedidoService;
 import jakarta.validation.Valid;
@@ -42,8 +44,20 @@ public class PedidoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PedidoResponse>> listarTodos() {
-        return ResponseEntity.ok(pedidoService.listarMisPedidos(1L));
+    public ResponseEntity<List<PedidoResponse>> listarTodos(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(pedidoService.listarTodosAdmin(principal));
+    }
+
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<PedidoResponse> cambiarEstado(@AuthenticationPrincipal UserPrincipal principal,
+                                                          @PathVariable Long id,
+                                                          @Valid @RequestBody CambiarEstadoPedidoRequest request) {
+        return ResponseEntity.ok(pedidoService.cambiarEstado(principal, id, request.getEstado()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, String>> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)

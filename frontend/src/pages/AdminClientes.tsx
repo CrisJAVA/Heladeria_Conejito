@@ -1,92 +1,65 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { listarUsuariosAdmin, type UsuarioAdminDTO } from "../services/admin";
 
-const clients = [
-  {
-    id: 1,
-    initial: "M",
-    avatarBg: "bg-[#ffb1c0]/40",
-    avatarText: "text-[#841e3f]",
-    name: "María García",
-    memberSince: "Desde Ene 2024",
-    email: "maria.garcia@email.com",
-    phone: "+51 956 123 456",
-    orders: 45,
-    totalSpent: "S/ 1,890",
-    points: 2450,
-    level: "Gold",
-    levelClass: "bg-[#fdd73b] text-[#554500]",
-    lastOrder: "Hoy",
-  },
-  {
-    id: 2,
-    initial: "C",
-    avatarBg: "bg-[#9bcbf8]/40",
-    avatarText: "text-[#104a70]",
-    name: "Carlos Mendoza",
-    memberSince: "Desde Feb 2024",
-    email: "carlos.mendoza@email.com",
-    phone: "+51 956 234 567",
-    orders: 32,
-    totalSpent: "S/ 1,280",
-    points: 1850,
-    level: "Silver",
-    levelClass: "bg-[#cde5ff] text-[#004064]",
-    lastOrder: "Ayer",
-  },
-  {
-    id: 3,
-    initial: "A",
-    avatarBg: "bg-[#ffd9df]/40",
-    avatarText: "text-[#841e3f]",
-    name: "Ana Torres",
-    memberSince: "Desde Mar 2024",
-    email: "ana.torres@email.com",
-    phone: "+51 956 345 678",
-    orders: 28,
-    totalSpent: "S/ 1,120",
-    points: 1560,
-    level: "Silver",
-    levelClass: "bg-[#cde5ff] text-[#004064]",
-    lastOrder: "Hoy",
-  },
-  {
-    id: 4,
-    initial: "R",
-    avatarBg: "bg-[#ffe173]/40",
-    avatarText: "text-[#554500]",
-    name: "Roberto Silva",
-    memberSince: "Desde Abr 2024",
-    email: "roberto.silva@email.com",
-    phone: "+51 956 456 789",
-    orders: 15,
-    totalSpent: "S/ 630",
-    points: 890,
-    level: "Bronze",
-    levelClass: "bg-[#D98E73]/20 text-[#D98E73]",
-    lastOrder: "2 días",
-  },
-  {
-    id: 5,
-    initial: "L",
-    avatarBg: "bg-[#191c1d]/10",
-    avatarText: "text-[#841e3f]",
-    name: "Lucía Ramírez",
-    memberSince: "Desde May 2024",
-    email: "lucia.ramirez@email.com",
-    phone: "+51 956 567 890",
-    orders: 8,
-    totalSpent: "S/ 320",
-    points: 450,
-    level: "Bronze",
-    levelClass: "bg-[#D98E73]/20 text-[#D98E73]",
-    lastOrder: "3 días",
-  },
+const filters = ["Todos", "Diamante", "Oro", "Plata", "Bronce"];
+
+const NIVEL_ESTILO: Record<string, string> = {
+  Diamante: "bg-[#cde5ff] text-[#004064]",
+  Oro: "bg-[#fdd73b] text-[#554500]",
+  Plata: "bg-[#e7e8e9] text-[#564245]",
+  Bronce: "bg-[#D98E73]/20 text-[#D98E73]",
+};
+
+const AVATAR_ESTILOS = [
+  { bg: "bg-[#ffb1c0]/40", text: "text-[#841e3f]" },
+  { bg: "bg-[#9bcbf8]/40", text: "text-[#104a70]" },
+  { bg: "bg-[#ffd9df]/40", text: "text-[#841e3f]" },
+  { bg: "bg-[#ffe173]/40", text: "text-[#554500]" },
+  { bg: "bg-[#191c1d]/10", text: "text-[#841e3f]" },
 ];
 
-const filters = ["Todos", "Gold", "Silver", "Bronze"];
+function formatearFecha(fechaIso: string) {
+  return new Date(fechaIso).toLocaleDateString("es-PE", { month: "short", year: "numeric" });
+}
+
+function formatearUltimoPedido(fechaIso: string | null) {
+  if (!fechaIso) return "Sin pedidos";
+  const dias = Math.floor((Date.now() - new Date(fechaIso).getTime()) / (1000 * 60 * 60 * 24));
+  if (dias <= 0) return "Hoy";
+  if (dias === 1) return "Ayer";
+  return `${dias} días`;
+}
 
 export default function AdminClientes() {
   const navigate = useNavigate();
+  const [clients, setClients] = useState<UsuarioAdminDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filtroActivo, setFiltroActivo] = useState("Todos");
+  const [busqueda, setBusqueda] = useState("");
+
+  useEffect(() => {
+    listarUsuariosAdmin()
+      .then((data) => setClients(data.filter((u) => u.rol === "CLIENTE")))
+      .catch(() => toast.error("Error al cargar clientes"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const clientesFiltrados = useMemo(() => {
+    return clients.filter((c) => {
+      const coincideFiltro = filtroActivo === "Todos" || c.nivel === filtroActivo;
+      const coincideBusqueda =
+        busqueda.trim() === "" ||
+        c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        c.email.toLowerCase().includes(busqueda.toLowerCase());
+      return coincideFiltro && coincideBusqueda;
+    });
+  }, [clients, filtroActivo, busqueda]);
+
+  const totalClientes = clients.length;
+  const nivelTop = clients.filter((c) => c.nivel === "Oro" || c.nivel === "Diamante").length;
+  const nuevosHoy = clients.filter((c) => new Date(c.createdAt).toDateString() === new Date().toDateString()).length;
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
@@ -229,17 +202,19 @@ export default function AdminClientes() {
                 className="w-full bg-[#f3f4f5] border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-[#ff7e9d] transition-all text-[14px] outline-none"
                 placeholder="Buscar clientes..."
                 type="text"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
               {filters.map((filter) => (
                 <button
                   key={filter}
-                  className={`px-6 py-2 rounded-full text-[14px] active:scale-95 transition-all ${
-                    filter === "Todos"
-                      ? "bg-[#ff7e9d] text-[#761235] font-bold"
-                      : "bg-[#f3f4f5] text-[#564245] font-medium hover:bg-[#e7e8e9]"
-                  }`}
+                  onClick={() => setFiltroActivo(filter)}
+                  className={`px-6 py-2 rounded-full text-[14px] active:scale-95 transition-all ${filter === filtroActivo
+                    ? "bg-[#ff7e9d] text-[#761235] font-bold"
+                    : "bg-[#f3f4f5] text-[#564245] font-medium hover:bg-[#e7e8e9]"
+                    }`}
                 >
                   {filter}
                 </button>
@@ -261,45 +236,57 @@ export default function AdminClientes() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e7e8e9]">
-                {clients.map((client) => (
+                {clientesFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-8 py-10 text-center text-[#564245]">
+                      {loading ? "Cargando clientes..." : "No se encontraron clientes"}
+                    </td>
+                  </tr>
+                ) : (
+                  clientesFiltrados.map((client) => (
                   <tr key={client.id} className="hover:bg-[#f3f4f5] transition-colors group">
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-4">
                         <div
-                          className={`w-10 h-10 rounded-full ${client.avatarBg} flex items-center justify-center ${client.avatarText} font-bold`}
+                          className="w-10 h-10 rounded-full bg-[#ffd9df] flex items-center justify-center text-[#841e3f] font-bold"
                         >
-                          {client.initial}
+                          {client.nombre.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-[#191c1d] text-[14px]">{client.name}</p>
-                          <p className="text-[#564245] text-[12px] leading-[16px]">{client.memberSince}</p>
+                          <p className="font-bold text-[#191c1d] text-[14px]">{client.nombre}</p>
+                          <p className="text-[#564245] text-[12px] leading-[16px]">{formatearFecha(client.createdAt)}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-[#564245] text-[14px]">{client.email}</p>
-                      <p className="text-[#564245]/60 text-[12px] leading-[16px]">{client.phone}</p>
+                      <p className="text-[#564245]/60 text-[12px] leading-[16px]">{client.telefono}</p>
                     </td>
-                    <td className="px-6 py-4 font-black text-[#191c1d]">{client.orders}</td>
-                    <td className="px-6 py-4 font-black text-[#a43756]">{client.totalSpent}</td>
+                    <td className="px-6 py-4 font-black text-[#191c1d]">{client.totalPedidos}</td>
+                    <td className="px-6 py-4 font-black text-[#a43756]">S/ {client.totalGastado}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
                         <span className="material-symbols-outlined text-[#e8c426] scale-75" style={{ fontVariationSettings: "'FILL' 1" }}>
                           star
                         </span>
-                        <span className="text-[#191c1d] font-bold">{client.points}</span>
+                        <span className="text-[#191c1d] font-bold">{client.puntosActuales}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`${client.levelClass} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}
+                        className={`${NIVEL_ESTILO[client.nivel] ?? "bg-gray-200 text-gray-700"} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}
                       >
-                        {client.level}
+                        {client.nivel}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-[#564245]">{client.lastOrder}</td>
+                    <td className="px-8 py-4 text-[#564245]">{formatearUltimoPedido(
+                      client.ultimoPedido
+                        ? client.ultimoPedido.toString()
+                        : null
+                    )}</td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>

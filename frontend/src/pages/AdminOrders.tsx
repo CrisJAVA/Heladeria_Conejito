@@ -1,77 +1,85 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { listarPedidosAdmin, cambiarEstadoPedido, type PedidoAdminResponse } from "../services/admin";
 
-const orders = [
-  {
-    id: "#1234",
-    client: "María García",
-    phone: "+51 956 123 456",
-    items: ["2x Cono Triple Arcoíris", "1x Pizza Personal"],
-    total: "S/ 42.00",
-    payment: "Efectivo",
-    status: "En preparación",
-    statusClass: "bg-[#ffe173] text-[#554500]",
-    statusIcon: "cooking",
-    date: "10:30 AM",
-    fullDate: "8 Jun 2026",
-  },
-  {
-    id: "#1233",
-    client: "Carlos Mendoza",
-    phone: "+51 956 234 567",
-    items: ["1x Milkshake de Fresa"],
-    total: "S/ 15.00",
-    payment: "Tarjeta",
-    status: "Listo",
-    statusClass: "bg-green-100 text-green-700",
-    statusIcon: "check",
-    date: "10:25 AM",
-    fullDate: "8 Jun 2026",
-  },
-  {
-    id: "#1232",
-    client: "Ana Torres",
-    phone: "+51 956 345 678",
-    items: ["1x Combo Familiar"],
-    total: "S/ 45.00",
-    payment: "Yape",
-    status: "Entregado",
-    statusClass: "bg-[#cde5ff] text-[#004064]",
-    statusIcon: "local_shipping",
-    date: "10:15 AM",
-    fullDate: "8 Jun 2026",
-  },
-  {
-    id: "#1231",
-    client: "Roberto Silva",
-    phone: "+51 956 456 789",
-    items: ["3x Copa de Chocolate", "1x Pizza BBQ"],
-    total: "S/ 52.00",
-    payment: "Efectivo",
-    status: "En preparación",
-    statusClass: "bg-[#ffe173] text-[#554500]",
-    statusIcon: "cooking",
-    date: "10:20 AM",
-    fullDate: "8 Jun 2026",
-  },
-  {
-    id: "#1230",
-    client: "Lucía Ramírez",
-    phone: "+51 956 567 890",
-    items: ["2x Milkshake", "2x Cono Simple"],
-    total: "S/ 38.00",
-    payment: "Plin",
-    status: "Pendiente",
-    statusClass: "bg-[#e7e8e9] text-[#564245]",
-    statusIcon: "schedule",
-    date: "10:10 AM",
-    fullDate: "8 Jun 2026",
-  },
-];
+// El backend maneja los pedidos con estados en mayúsculas (PENDIENTE, CONFIRMADO,
+// PREPARANDO, EN_CAMINO, ENTREGADO, CANCELADO). Aquí se mapean a las mismas
+// etiquetas e íconos visuales que ya tenía el diseño original.
+const ESTADO_INFO: Record<string, { label: string; statusClass: string; statusIcon: string }> = {
+  PENDIENTE: { label: "Pendiente", statusClass: "bg-[#e7e8e9] text-[#564245]", statusIcon: "schedule" },
+  CONFIRMADO: { label: "Confirmado", statusClass: "bg-[#cde5ff] text-[#004064]", statusIcon: "task_alt" },
+  PREPARANDO: { label: "En preparación", statusClass: "bg-[#ffe173] text-[#554500]", statusIcon: "cooking" },
+  EN_CAMINO: { label: "En camino", statusClass: "bg-[#cde5ff] text-[#004064]", statusIcon: "local_shipping" },
+  ENTREGADO: { label: "Entregado", statusClass: "bg-green-100 text-green-700", statusIcon: "check" },
+  CANCELADO: { label: "Cancelado", statusClass: "bg-red-100 text-red-700", statusIcon: "cancel" },
+};
 
 const filters = ["Todos", "Pendiente", "En preparación", "Listo", "Entregado", "Cancelado"];
 
+const SIGUIENTE_ESTADO: Record<string, string> = {
+  PENDIENTE: "CONFIRMADO",
+  CONFIRMADO: "PREPARANDO",
+  PREPARANDO: "EN_CAMINO",
+  EN_CAMINO: "ENTREGADO",
+};
+
+function formatearFecha(fechaIso: string) {
+  const fecha = new Date(fechaIso);
+  const hora = fecha.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+  const dia = fecha.toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" });
+  return { hora, dia };
+}
+
 export default function AdminOrders() {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState<PedidoAdminResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filtroActivo, setFiltroActivo] = useState("Todos");
+  const [busqueda, setBusqueda] = useState("");
+
+  const cargarPedidos = () => {
+    setLoading(true);
+    listarPedidosAdmin()
+      .then(setOrders)
+      .catch(() => toast.error("Error al cargar pedidos"))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    cargarPedidos();
+  }, []);
+
+  const handleCambiarEstado = async (pedido: PedidoAdminResponse, nuevoEstado: string) => {
+    try {
+      await cambiarEstadoPedido(pedido.id, nuevoEstado);
+      toast.success("Estado del pedido actualizado");
+      cargarPedidos();
+    } catch {
+      toast.error("Error al actualizar el estado del pedido");
+    }
+  };
+
+  const pedidosFiltrados = useMemo(() => {
+    return orders.filter((o) => {
+      const label = ESTADO_INFO[o.estado]?.label || o.estado;
+      const coincideFiltro = filtroActivo === "Todos" || label === filtroActivo;
+      const texto = busqueda.trim().toLowerCase();
+      const coincideBusqueda =
+        texto === "" ||
+        (o.codigoPedido || "").toLowerCase().includes(texto) ||
+        (o.usuarioNombre || "").toLowerCase().includes(texto);
+      return coincideFiltro && coincideBusqueda;
+    });
+  }, [orders, filtroActivo, busqueda]);
+
+  const activos = orders.filter((o) => !["ENTREGADO", "CANCELADO"].includes(o.estado)).length;
+  const enPreparacion = orders.filter((o) => o.estado === "PREPARANDO").length;
+  const listos = orders.filter((o) => o.estado === "EN_CAMINO" || o.estado === "CONFIRMADO").length;
+  const completadosHoy = orders.filter((o) => {
+    const hoy = new Date().toDateString();
+    return o.estado === "ENTREGADO" && new Date(o.createdAt).toDateString() === hoy;
+  }).length;
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
@@ -187,7 +195,7 @@ export default function AdminOrders() {
                   <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>shopping_bag</span>
                 </div>
               </div>
-              <p className="text-[32px] font-black text-white leading-none">18</p>
+              <p className="text-[32px] font-black text-white leading-none">{activos}</p>
               <p className="text-[14px] text-white/90 mt-1">Pedidos Activos</p>
             </div>
             <div className="bg-[#fdd73b] p-6 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_10px_30px_rgba(255,126,157,0.12)] transition-all duration-300">
@@ -196,7 +204,7 @@ export default function AdminOrders() {
                   <span className="material-symbols-outlined text-[#554500]" style={{ fontVariationSettings: "'FILL' 1" }}>cooking</span>
                 </div>
               </div>
-              <p className="text-[32px] font-black text-[#554500] leading-none">8</p>
+              <p className="text-[32px] font-black text-[#554500] leading-none">{enPreparacion}</p>
               <p className="text-[14px] text-[#554500]/80 mt-1">En Preparación</p>
             </div>
             <div className="bg-[#7cacd7] p-6 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_10px_30px_rgba(255,126,157,0.12)] transition-all duration-300">
@@ -205,7 +213,7 @@ export default function AdminOrders() {
                   <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 </div>
               </div>
-              <p className="text-[32px] font-black text-white leading-none">5</p>
+              <p className="text-[32px] font-black text-white leading-none">{listos}</p>
               <p className="text-[14px] text-white/80 mt-1">Listos</p>
             </div>
             <div className="bg-[#ffd9df] p-6 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_10px_30px_rgba(255,126,157,0.12)] transition-all duration-300">
@@ -214,7 +222,7 @@ export default function AdminOrders() {
                   <span className="material-symbols-outlined text-[#3f0017]" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
                 </div>
               </div>
-              <p className="text-[32px] font-black text-[#3f0017] leading-none">45</p>
+              <p className="text-[32px] font-black text-[#3f0017] leading-none">{completadosHoy}</p>
               <p className="text-[14px] text-[#3f0017]/80 mt-1">Completados Hoy</p>
             </div>
           </div>
@@ -227,14 +235,17 @@ export default function AdminOrders() {
                   className="w-full pl-12 pr-4 py-3 bg-[#f3f4f5] border-none focus:ring-2 focus:ring-[#ff7e9d] rounded-xl text-[14px] outline-none transition-all"
                   placeholder="Buscar por ID o cliente..."
                   type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
                 />
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto">
                 {filters.map((filter) => (
                   <button
                     key={filter}
+                    onClick={() => setFiltroActivo(filter)}
                     className={`px-6 py-2 rounded-full text-[14px] whitespace-nowrap shadow-sm ${
-                      filter === "Todos"
+                      filter === filtroActivo
                         ? "bg-[#ff7e9d] text-[#761235] font-bold"
                         : "bg-[#edeeef] text-[#564245] hover:bg-[#e7e8e9] transition-colors"
                     }`}
@@ -261,56 +272,83 @@ export default function AdminOrders() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e1e3e4]">
-                  {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-white transition-colors group">
-                      <td className="px-6 py-5 font-black text-[#191c1d]">{order.id}</td>
-                      <td className="px-6 py-5">
-                        <div className="font-bold text-[#191c1d]">{order.client}</div>
-                        <div className="text-[12px] leading-[16px] text-[#564245]">{order.phone}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        {order.items.map((item, i) => (
-                          <div key={i} className={i === 0 ? "text-[14px] text-[#191c1d]" : "text-[12px] text-[#564245]"}>
-                            {item}
-                          </div>
-                        ))}
-                      </td>
-                      <td className="px-6 py-5 text-center">
-                        <div className="text-[#a43756] font-black text-[22px] leading-[28px]">{order.total}</div>
-                        <div className="text-[10px] text-[#564245]">{order.payment}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 ${order.statusClass} rounded-full text-[11px] font-bold`}
-                        >
-                          <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                            {order.statusIcon}
-                          </span>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="text-[14px] font-bold">{order.date}</div>
-                        <div className="text-[11px] text-[#564245]">{order.fullDate}</div>
-                      </td>
-                      <td className="px-6 py-5 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button className="p-2 text-[#a43756] hover:bg-[#ffd9df]/30 rounded-lg transition-all" title="Ver detalles">
-                            <span className="material-symbols-outlined">visibility</span>
-                          </button>
-                          <button className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-all" title="Marcar como listo">
-                            <span className="material-symbols-outlined">check_circle</span>
-                          </button>
-                        </div>
-                      </td>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-[#564245]">Cargando pedidos...</td>
                     </tr>
-                  ))}
+                  ) : pedidosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-[#564245]">No se encontraron pedidos</td>
+                    </tr>
+                  ) : (
+                    pedidosFiltrados.map((order) => {
+                      const info = ESTADO_INFO[order.estado] || ESTADO_INFO.PENDIENTE;
+                      const { hora, dia } = formatearFecha(order.createdAt);
+                      const siguiente = SIGUIENTE_ESTADO[order.estado];
+                      return (
+                        <tr key={order.id} className="hover:bg-white transition-colors group">
+                          <td className="px-6 py-5 font-black text-[#191c1d]">{order.codigoPedido || `#${order.id}`}</td>
+                          <td className="px-6 py-5">
+                            <div className="font-bold text-[#191c1d]">{order.usuarioNombre}</div>
+                            <div className="text-[12px] leading-[16px] text-[#564245]">{order.direccionEntrega || "—"}</div>
+                          </td>
+                          <td className="px-6 py-5">
+                            {order.detalles.map((item, i) => (
+                              <div key={item.id} className={i === 0 ? "text-[14px] text-[#191c1d]" : "text-[12px] text-[#564245]"}>
+                                {item.cantidad}x {item.nombre}
+                              </div>
+                            ))}
+                          </td>
+                          <td className="px-6 py-5 text-center">
+                            <div className="text-[#a43756] font-black text-[22px] leading-[28px]">S/ {order.total.toFixed(2)}</div>
+                            <div className="text-[10px] text-[#564245]">{order.metodoPago}</div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 ${info.statusClass} rounded-full text-[11px] font-bold`}
+                            >
+                              <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                {info.statusIcon}
+                              </span>
+                              {info.label}
+                            </span>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="text-[14px] font-bold">{hora}</div>
+                            <div className="text-[11px] text-[#564245]">{dia}</div>
+                          </td>
+                          <td className="px-6 py-5 text-right">
+                            <div className="flex justify-end gap-2">
+                              {siguiente && (
+                                <button
+                                  onClick={() => handleCambiarEstado(order, siguiente)}
+                                  className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-all"
+                                  title={`Avanzar a ${ESTADO_INFO[siguiente]?.label}`}
+                                >
+                                  <span className="material-symbols-outlined">check_circle</span>
+                                </button>
+                              )}
+                              {order.estado !== "CANCELADO" && order.estado !== "ENTREGADO" && (
+                                <button
+                                  onClick={() => handleCambiarEstado(order, "CANCELADO")}
+                                  className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-all"
+                                  title="Cancelar pedido"
+                                >
+                                  <span className="material-symbols-outlined">cancel</span>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
 
             <div className="px-6 py-4 bg-white border-t border-[#e1e3e4] flex justify-between items-center">
-              <span className="text-[12px] leading-[16px] text-[#564245]">Mostrando 5 de 18 pedidos activos</span>
+              <span className="text-[12px] leading-[16px] text-[#564245]">Mostrando {pedidosFiltrados.length} de {orders.length} pedidos</span>
               <div className="flex gap-2">
                 <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#e1e3e4] text-[#564245] hover:bg-[#f3f4f5] transition-all">
                   <span className="material-symbols-outlined text-[18px]">chevron_left</span>

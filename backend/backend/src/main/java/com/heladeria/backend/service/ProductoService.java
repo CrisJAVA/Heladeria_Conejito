@@ -1,10 +1,12 @@
 package com.heladeria.backend.service;
 
 import com.heladeria.backend.dto.ProductoDTO;
+import com.heladeria.backend.exception.ForbiddenException;
 import com.heladeria.backend.model.Categoria;
 import com.heladeria.backend.model.Producto;
 import com.heladeria.backend.repository.CategoriaRepository;
 import com.heladeria.backend.repository.ProductoRepository;
+import com.heladeria.backend.security.UserPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -19,6 +21,12 @@ public class ProductoService {
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
+    }
+
+    private void checkAdmin(UserPrincipal principal) {
+        if (principal == null || !"ADMIN".equals(principal.rol())) {
+            throw new ForbiddenException("Acceso denegado: se requiere rol ADMIN");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +72,8 @@ public class ProductoService {
     }
 
     @Transactional
-    public ProductoDTO crear(ProductoDTO dto) {
+    public ProductoDTO crear(UserPrincipal principal, ProductoDTO dto) {
+        checkAdmin(principal);
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
         Producto producto = toEntity(dto, categoria);
@@ -72,7 +81,8 @@ public class ProductoService {
     }
 
     @Transactional
-    public ProductoDTO actualizar(Long id, ProductoDTO dto) {
+    public ProductoDTO actualizar(UserPrincipal principal, Long id, ProductoDTO dto) {
+        checkAdmin(principal);
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
@@ -89,7 +99,11 @@ public class ProductoService {
     }
 
     @Transactional
-    public void eliminar(Long id) {
+    public void eliminar(UserPrincipal principal, Long id) {
+        checkAdmin(principal);
+        if (!productoRepository.existsById(id)) {
+            throw new RuntimeException("Producto no encontrado");
+        }
         productoRepository.deleteById(id);
     }
 

@@ -9,4 +9,5 @@ import java.util.List;
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByUsuarioIdOrderByCreatedAtDesc(Long usuarioId);
     List<Pedido> findByEstadoOrderByCreatedAtDesc(String estado);
+    List<Pedido> findAllByOrderByCreatedAtDesc();
 }

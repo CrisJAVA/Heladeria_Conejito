@@ -1,7 +1,36 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { obtenerDashboardStats, type DashboardStatsDTO } from "../services/admin";
+
+const ESTADO_LABEL: Record<string, { label: string; className: string }> = {
+  PENDIENTE: { label: "Pendiente", className: "bg-gray-100 text-gray-600" },
+  CONFIRMADO: { label: "Confirmado", className: "bg-blue-100 text-blue-800" },
+  PREPARANDO: { label: "En preparación", className: "bg-amber-100 text-amber-800" },
+  EN_CAMINO: { label: "En camino", className: "bg-blue-100 text-blue-800" },
+  ENTREGADO: { label: "Entregado", className: "bg-green-100 text-green-800" },
+  CANCELADO: { label: "Cancelado", className: "bg-red-100 text-red-700" },
+};
+
+function tiempoDesde(fechaIso: string) {
+  const minutos = Math.max(1, Math.floor((Date.now() - new Date(fechaIso).getTime()) / 60000));
+  if (minutos < 60) return `${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  return `${horas} h`;
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
+
+  useEffect(() => {
+    obtenerDashboardStats()
+      .then(setStats)
+      .catch(() => toast.error("Error al cargar el dashboard"));
+  }, []);
+
+  const maxCantidad = stats?.productosMasVendidos?.[0]?.cantidadVendida || 1;
+  const barColors = ["bg-orange-300", "bg-orange-400", "bg-pink-400", "bg-purple-400", "bg-blue-400"];
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa] font-[Inter]">
@@ -124,7 +153,7 @@ export default function AdminDashboard() {
                 +12.5%
               </div>
             </div>
-            <p className="text-3xl font-black text-gray-800">S/ 2,450</p>
+            <p className="text-3xl font-black text-gray-800">S/ {(stats?.ventasHoy ?? 0).toFixed(2)}</p>
             <p className="text-gray-400 text-sm mt-1">Ventas Hoy</p>
           </div>
 
@@ -142,7 +171,7 @@ export default function AdminDashboard() {
                 +5
               </div>
             </div>
-            <p className="text-3xl font-black text-gray-800">18</p>
+            <p className="text-3xl font-black text-gray-800">{stats?.pedidosActivos ?? 0}</p>
             <p className="text-gray-400 text-sm mt-1">Pedidos Activos</p>
           </div>
 
@@ -160,7 +189,7 @@ export default function AdminDashboard() {
                 +8.2%
               </div>
             </div>
-            <p className="text-3xl font-black text-gray-800">24</p>
+            <p className="text-3xl font-black text-gray-800">{stats?.clientesNuevosHoy ?? 0}</p>
             <p className="text-gray-400 text-sm mt-1">Clientes Nuevos</p>
           </div>
 
@@ -192,119 +221,66 @@ export default function AdminDashboard() {
               </a>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100">
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm font-bold text-gray-800">#1234</div>
-                  <div>
-                    <p className="font-semibold text-gray-700">María García</p>
-                    <p className="text-xs text-gray-400">2x Cono Triple, 1x Pizza</p>
-                  </div>
-                </div>
-                <div className="text-right flex items-center space-x-6">
-                  <div>
-                    <p className="font-black text-gray-900 text-[16px]">S/ 42.00</p>
-                    <p className="text-[10px] text-gray-400 flex items-center justify-end">
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                      </svg>
-                      5 min
-                    </p>
-                  </div>
-                  <span className="px-3 py-1.5 bg-amber-100 text-amber-800 text-[11px] font-bold rounded-lg uppercase">
-                    En preparación
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100">
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm font-bold text-gray-800">#1233</div>
-                  <div>
-                    <p className="font-semibold text-gray-700">Carlos Mendoza</p>
-                    <p className="text-xs text-gray-400">1x Milkshake Fresa</p>
-                  </div>
-                </div>
-                <div className="text-right flex items-center space-x-6">
-                  <div>
-                    <p className="font-black text-gray-900 text-[16px]">S/ 15.00</p>
-                    <p className="text-[10px] text-gray-400 flex items-center justify-end">
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                      </svg>
-                      2 min
-                    </p>
-                  </div>
-                  <span className="px-3 py-1.5 bg-green-100 text-green-800 text-[11px] font-bold rounded-lg uppercase">
-                    Listo
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100">
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm font-bold text-gray-800">#1232</div>
-                  <div>
-                    <p className="font-semibold text-gray-700">Ana Torres</p>
-                    <p className="text-xs text-gray-400">Combo Familiar</p>
-                  </div>
-                </div>
-                <div className="text-right flex items-center space-x-6">
-                  <div>
-                    <p className="font-black text-gray-900 text-[16px]">S/ 45.00</p>
-                    <p className="text-[10px] text-gray-400 flex items-center justify-end">
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                      </svg>
-                      15 min
-                    </p>
-                  </div>
-                  <span className="px-3 py-1.5 bg-gray-100 text-gray-600 text-[11px] font-bold rounded-lg uppercase">
-                    Entregado
-                  </span>
-                </div>
-              </div>
+              {(stats?.pedidosRecientes ?? []).length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-6">Sin pedidos recientes</p>
+              ) : (
+                stats!.pedidosRecientes.map((pedido) => {
+                  const estado = ESTADO_LABEL[pedido.estado] || ESTADO_LABEL.PENDIENTE;
+                  const itemsTexto = pedido.detalles.map((d) => `${d.cantidad}x ${d.nombre}`).join(", ");
+                  return (
+                    <div key={pedido.id} className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="flex items-center space-x-4">
+                        <div className="text-sm font-bold text-gray-800">{pedido.codigoPedido}</div>
+                        <div>
+                          <p className="font-semibold text-gray-700">{pedido.usuarioNombre}</p>
+                          <p className="text-xs text-gray-400">{itemsTexto}</p>
+                        </div>
+                      </div>
+                      <div className="text-right flex items-center space-x-6">
+                        <div>
+                          <p className="font-black text-gray-900 text-[16px]">S/ {pedido.total.toFixed(2)}</p>
+                          <p className="text-[10px] text-gray-400 flex items-center justify-end">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                            </svg>
+                            {tiempoDesde(pedido.createdAt)}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1.5 ${estado.className} text-[11px] font-bold rounded-lg uppercase`}>
+                          {estado.label}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
           <div className="bg-white p-8 rounded-[40px] shadow-md">
             <h4 className="text-xl font-bold text-gray-800 mb-8">Productos Populares</h4>
             <div className="space-y-8">
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <p className="font-bold text-gray-700">Cono Triple Arcoíris</p>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-400 block">45 vendidos</span>
-                    <span className="text-[#a43756] font-black text-sm">S/ 540</span>
+              {(stats?.productosMasVendidos ?? []).length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-6">Sin datos de ventas todavía</p>
+              ) : (
+                stats!.productosMasVendidos.map((producto, i) => (
+                  <div key={producto.nombre}>
+                    <div className="flex justify-between items-end mb-2">
+                      <p className="font-bold text-gray-700">{producto.nombre}</p>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-400 block">{producto.cantidadVendida} vendidos</span>
+                        <span className="text-[#a43756] font-black text-sm">S/ {producto.totalVendido.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`${barColors[i % barColors.length]} h-full rounded-full`}
+                        style={{ width: `${Math.max(10, (producto.cantidadVendida / maxCantidad) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-orange-300 h-full rounded-full" style={{ width: "85%" }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <p className="font-bold text-gray-700">Pizza Personal</p>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-400 block">32 vendidos</span>
-                    <span className="text-[#a43756] font-black text-sm">S/ 576</span>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-orange-400 h-full rounded-full" style={{ width: "65%" }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <p className="font-bold text-gray-700">Milkshake de Fresa</p>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-400 block">28 vendidos</span>
-                    <span className="text-[#a43756] font-black text-sm">S/ 420</span>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-pink-400 h-full rounded-full" style={{ width: "50%" }} />
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
         </div>

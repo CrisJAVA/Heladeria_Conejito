@@ -1,76 +1,29 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, IceCream, Gift, Clock, Users, Cake, Sparkles, Coffee, BadgePercent, Tag } from "lucide-react";
+import { ArrowLeft, IceCream, Gift, Clock, Users, Cake, Sparkles, Coffee, BadgePercent, Tag, Gem } from "lucide-react";
 import Footer from "../app/components/Footer";
+import { listarPromocionesActivas, type PromocionDTO } from "../services/promociones";
 
-const promotions = [
-  {
-    title: "2x1 en Conos",
-    description: "Todos los lunes y martes, llévate 2 conos del sabor que quieras por el precio de 1.",
-    discount: "2x1",
-    days: "Lun - Mar",
-    icon: IceCream,
-    color: "from-[#ff6b9d] to-[#ff8fab]",
-  },
-  {
-    title: "Combo Familiar",
-    description: "4 helados artesanales + 4 toppings + 1 jarra de jugo natural a un precio especial.",
-    discount: "S/ 39.90",
-    days: "Todos los días",
-    icon: Users,
-    color: "from-[#ffd93d] to-[#ffed4e]",
-  },
-  {
-    title: "Happy Hour",
-    description: "De 6:00 pm a 8:00 pm, todos los milkshakes y batidos tienen 30% de descuento.",
-    discount: "-30%",
-    days: "6:00 - 8:00 pm",
-    icon: Clock,
-    color: "from-[#a7e4f2] to-[#c3ecf6]",
-  },
-  {
-    title: "Helado de Cumpleaños",
-    description: "Celebra con nosotros y recibe un helado gigante completamente gratis presentando tu DNI.",
-    discount: "GRATIS",
-    days: "En tu cumpleaños",
-    icon: Cake,
-    color: "from-[#c8b6ff] to-[#dac9ff]",
-  },
-  {
-    title: "Combo Estudiantes",
-    description: "Presenta tu carnet y llévate un cono + bebida por solo S/ 7.90.",
-    discount: "S/ 7.90",
-    days: "Lun - Vie",
-    icon: Sparkles,
-    color: "from-[#4ade80] to-[#22c55e]",
-  },
-  {
-    title: "Toppings Extra",
-    description: "Agrega hasta 3 toppings adicionales a tu helado por solo S/ 1.00 más.",
-    discount: "S/ 1.00",
-    days: "Todos los días",
-    icon: Coffee,
-    color: "from-[#ff8fab] to-[#ff6b9d]",
-  },
-  {
-    title: "Noche de Pizzas",
-    description: "Los jueves por la noche, todas las pizzas individuales tienen 25% de descuento.",
-    discount: "-25%",
-    days: "Jueves 7:00 pm",
-    icon: BadgePercent,
-    color: "from-[#f97316] to-[#fb923c]",
-  },
-  {
-    title: "Sabor del Mes",
-    description: "Prueba nuestro sabor especial del mes y llévate el segundo medio cono a mitad de precio.",
-    discount: "50% OFF",
-    days: "Todo el mes",
-    icon: Tag,
-    color: "from-[#ec4899] to-[#f472b6]",
-  },
-];
+const ICONOS: Record<string, any> = {
+  IceCream, Users, Clock, Cake, Sparkles, Coffee, BadgePercent, Tag, Gift, Gem,
+};
+
+function resolverIcono(nombre?: string) {
+  if (nombre && ICONOS[nombre]) return ICONOS[nombre];
+  return Gift;
+}
 
 export default function PromocionesPage() {
   const navigate = useNavigate();
+  const [promotions, setPromotions] = useState<PromocionDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    listarPromocionesActivas()
+      .then(setPromotions)
+      .catch(() => setPromotions([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#fffbf7] flex flex-col relative">
@@ -106,29 +59,42 @@ export default function PromocionesPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {promotions.map((promo, i) => (
-            <div
-              key={i}
-              className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${promo.color} flex items-center justify-center`}>
-                  <promo.icon className="w-6 h-6 text-white" />
+        {loading ? (
+          <div className="text-center text-gray-400 py-10">Cargando promociones...</div>
+        ) : promotions.length === 0 ? (
+          <div className="text-center text-gray-400 py-10">No hay promociones activas por el momento.</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {promotions.map((promo) => {
+              const Icon = resolverIcono(promo.icono);
+              return (
+                <div
+                  key={promo.id}
+                  className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${promo.color || "from-[#ff6b9d] to-[#ff8fab]"} flex items-center justify-center`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    {promo.descuento && (
+                      <span className="px-3 py-1 bg-[#ff6b9d]/10 text-[#ff6b9d] font-bold text-sm rounded-full">
+                        {promo.descuento}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-lg text-[#2d2d2d] mb-2">{promo.titulo}</h3>
+                  <p className="text-sm text-gray-500 mb-4">{promo.descripcion}</p>
+                  {promo.diasVigencia && (
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{promo.diasVigencia}</span>
+                    </div>
+                  )}
                 </div>
-                <span className="px-3 py-1 bg-[#ff6b9d]/10 text-[#ff6b9d] font-bold text-sm rounded-full">
-                  {promo.discount}
-                </span>
-              </div>
-              <h3 className="font-bold text-lg text-[#2d2d2d] mb-2">{promo.title}</h3>
-              <p className="text-sm text-gray-500 mb-4">{promo.description}</p>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{promo.days}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </main>
 
       <Footer />

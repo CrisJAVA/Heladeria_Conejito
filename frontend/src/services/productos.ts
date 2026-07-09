@@ -13,6 +13,10 @@ export interface ProductoDTO {
   destacado: boolean;
 }
 
+function getToken(): string | null {
+  return localStorage.getItem("auth_token");
+}
+
 export async function listarProductos(): Promise<ProductoDTO[]> {
   const res = await fetch(`${API_BASE}/productos`);
   if (!res.ok) {
@@ -34,19 +38,39 @@ export async function obtenerProducto(id: number): Promise<ProductoDTO> {
 export async function crearProducto(dto: ProductoDTO): Promise<ProductoDTO> {
   const res = await fetch(`${API_BASE}/productos`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
     body: JSON.stringify(dto),
   });
-  if (!res.ok) throw new Error("Error al crear producto");
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("POST /api/productos error body:", text);
+    throw new Error("Error al crear producto");
+  }
   return res.json();
 }
 
 export async function actualizarProducto(id: number, dto: ProductoDTO): Promise<ProductoDTO> {
   const res = await fetch(`${API_BASE}/productos/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
     body: JSON.stringify(dto),
   });
-  if (!res.ok) throw new Error("Error al actualizar producto");
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("PUT /api/productos error body:", text);
+    throw new Error("Error al actualizar producto");
+  }
   return res.json();
+}
+
+export async function eliminarProducto(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/productos/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("DELETE /api/productos error body:", text);
+    throw new Error("Error al eliminar producto");
+  }
 }

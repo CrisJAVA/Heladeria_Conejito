@@ -1,24 +1,102 @@
 package com.heladeria.backend.service;
 
+import com.heladeria.backend.dto.CambiarEstadoUsuarioRequest;
 import com.heladeria.backend.dto.CambiarPasswordRequest;
+import com.heladeria.backend.dto.CambiarRolRequest;
 import com.heladeria.backend.dto.LoginRequest;
 import com.heladeria.backend.dto.PerfilDTO;
 import com.heladeria.backend.dto.RegisterRequest;
+import com.heladeria.backend.dto.UsuarioAdminDTO;
+import com.heladeria.backend.exception.ForbiddenException;
+import com.heladeria.backend.model.Pedido;
+import com.heladeria.backend.model.Puntos;
 import com.heladeria.backend.model.Usuario;
+import com.heladeria.backend.repository.PedidoRepository;
+import com.heladeria.backend.repository.PuntosRepository;
 import com.heladeria.backend.repository.UsuarioRepository;
+import com.heladeria.backend.security.UserPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PedidoRepository pedidoRepository;
+    private final PuntosRepository puntosRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+                           PedidoRepository pedidoRepository, PuntosRepository puntosRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.pedidoRepository = pedidoRepository;
+        this.puntosRepository = puntosRepository;
+    }
+
+    private void checkAdmin(UserPrincipal principal) {
+        if (principal == null || !"ADMIN".equals(principal.rol())) {
+            throw new ForbiddenException("Acceso denegado: se requiere rol ADMIN");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioAdminDTO> listarTodos(UserPrincipal principal) {
+        checkAdmin(principal);
+        return usuarioRepository.findAll().stream().map(u -> {
+            UsuarioAdminDTO dto = new UsuarioAdminDTO();
+            dto.setId(u.getId());
+            dto.setNombre(u.getNombre());
+            dto.setEmail(u.getEmail());
+            dto.setTelefono(u.getTelefono());
+            dto.setDireccion(u.getDireccion());
+            dto.setRol(u.getRol());
+            dto.setActivo(u.getActivo());
+            dto.setCreatedAt(u.getCreatedAt());
+
+            List<Pedido> pedidosUsuario = pedidoRepository.findByUsuarioIdOrderByCreatedAtDesc(u.getId());
+            dto.setTotalPedidos(pedidosUsuario.size());
+            dto.setTotalGastado(pedidosUsuario.stream()
+                    .filter(p -> !"CANCELADO".equals(p.getEstado()))
+                    .map(Pedido::getTotal)
+                    .filter(java.util.Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add));
+            dto.setUltimoPedido(pedidosUsuario.isEmpty() ? null : pedidosUsuario.get(0).getCreatedAt());
+
+            Puntos puntos = puntosRepository.findByUsuarioId(u.getId()).orElse(null);
+            dto.setPuntosActuales(puntos != null ? puntos.getPuntosActuales() : 0);
+            dto.setNivel(puntos != null && puntos.getNivel() != null ? puntos.getNivel().getNombre() : "Bronce");
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cambiarEstado(UserPrincipal principal, Long usuarioId, CambiarEstadoUsuarioRequest request) {
+        checkAdmin(principal);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (request.getActivo() != null) {
+            usuario.setActivo(request.getActivo());
+        }
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void cambiarRol(UserPrincipal principal, Long usuarioId, CambiarRolRequest request) {
+        checkAdmin(principal);
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (!"ADMIN".equals(request.getRol()) && !"CLIENTE".equals(request.getRol())) {
+            throw new RuntimeException("Rol inválido");
+        }
+        usuario.setRol(request.getRol());
+        usuarioRepository.save(usuario);
     }
 
     @Transactional
