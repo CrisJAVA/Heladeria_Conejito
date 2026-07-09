@@ -1,0 +1,26 @@
+package com.heladeria.backend.dto;
+
+public class PuntosDTO {
+
+    private Long id;
+    private int puntosActuales;
+    private int puntosAcumulados;
+    private String nivel;
+    private String nivelColor;
+    private boolean afiliado;
+
+    public PuntosDTO() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public int getPuntosActuales() { return puntosActuales; }
+    public void setPuntosActuales(int puntosActuales) { this.puntosActuales = puntosActuales; }
+    public int getPuntosAcumulados() { return puntosAcumulados; }
+    public void setPuntosAcumulados(int puntosAcumulados) { this.puntosAcumulados = puntosAcumulados; }
+    public String getNivel() { return nivel; }
+    public void setNivel(String nivel) { this.nivel = nivel; }
+    public String getNivelColor() { return nivelColor; }
+    public void setNivelColor(String nivelColor) { this.nivelColor = nivelColor; }
+    public boolean isAfiliado() { return afiliado; }
+    public void setAfiliado(boolean afiliado) { this.afiliado = afiliado; }
+}
