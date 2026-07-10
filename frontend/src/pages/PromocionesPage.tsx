@@ -1,0 +1,111 @@
+import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
+import { ArrowLeft, IceCream, Gift, Clock, Users, Cake, BadgePercent } from "lucide-react";
+import Footer from "../app/components/Footer";
+
+const promotions = [
+  {
+    title: "2x1 en Conos",
+    description: "Todos los lunes y martes, llévate 2 conos del sabor que quieras por el precio de 1.",
+    discount: "2x1",
+    days: "Lun - Mar",
+    icon: IceCream,
+    color: "from-[#ff6b9d] to-[#ff8fab]",
+  },
+  {
+    title: "Combo Familiar",
+    description: "2 pizzas + 4 raspadillas a un precio especial. Ideal para compartir en familia.",
+    discount: "S/ 39.90",
+    days: "Todos los días",
+    icon: Users,
+    color: "from-[#ffd93d] to-[#ffed4e]",
+  },
+  {
+    title: "Helado de Cumpleaños",
+    description: "Celebra con nosotros y recibe un helado gigante completamente gratis presentando tu DNI.",
+    discount: "GRATIS",
+    days: "En tu cumpleaños",
+    icon: Cake,
+    color: "from-[#c8b6ff] to-[#dac9ff]",
+  },
+  {
+    title: "Noche de Pizzas",
+    description: "Los jueves por la noche, todas las pizzas tienen 25% de descuento.",
+    discount: "-25%",
+    days: "Jueves 7:00 pm",
+    icon: BadgePercent,
+    color: "from-[#f97316] to-[#fb923c]",
+  },
+];
+
+export default function PromocionesPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-[#fffbf7] flex flex-col relative">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#ff6b9d]/5" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#ffd93d]/5" />
+        <div className="absolute top-1/3 -left-10 w-40 h-40 rounded-full bg-[#ff6b9d]/5" />
+        <div className="absolute bottom-1/4 right-10 w-24 h-24 rounded-full bg-[#ffd93d]/10" />
+        <IceCream className="absolute top-40 left-8 w-12 h-12 text-[#ff6b9d]/5 rotate-12" />
+        <IceCream className="absolute bottom-40 right-12 w-16 h-16 text-[#ffd93d]/5 -rotate-12" />
+      </div>
+
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between px-4 md:px-8 py-4 max-w-5xl mx-auto w-full">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-[#ff6b9d] transition-colors font-medium">
+            <ArrowLeft className="w-5 h-5" /> Volver
+          </button>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-bold text-[#2d2d2d]">Promociones</h1>
+            <div className="p-2 bg-[#ffd93d]/20 rounded-xl">
+              <Gift className="w-5 h-5 text-[#b8860b]" />
+            </div>
+          </div>
+          <div className="w-20" />
+        </div>
+      </header>
+
+      <main className="flex-1 px-4 md:px-8 py-6 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-[#2d2d2d] mb-3">¡Aprovecha nuestras ofertas!</h2>
+          <p className="text-gray-500 max-w-xl mx-auto">
+            Promociones pensadas para que disfrutes más por menos. Válidas hasta nuevo aviso.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {promotions.map((promo, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="group bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${promo.color} flex items-center justify-center`}>
+                  <promo.icon className="w-6 h-6 text-white" />
+                </div>
+                <span className="px-3 py-1 bg-[#ff6b9d]/10 text-[#ff6b9d] font-bold text-sm rounded-full">
+                  {promo.discount}
+                </span>
+              </div>
+              <h3 className="font-bold text-lg text-[#2d2d2d] mb-2">{promo.title}</h3>
+              <p className="text-sm text-gray-500 mb-4">{promo.description}</p>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{promo.days}</span>
+              </div>
+            </motion.div>
+          ))}
+          </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
