@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { listarImagenes, subirImagen, eliminarImagen } from "../services/upload";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 interface ImagenInfo {
   filename: string;
@@ -21,6 +22,7 @@ export default function AdminMedia() {
   const [dragging, setDragging] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -35,6 +37,12 @@ export default function AdminMedia() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
+  }, []);
 
   const handleUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
@@ -94,7 +102,11 @@ export default function AdminMedia() {
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] flex flex-col py-6 px-4 bg-white z-50">
         <div className="flex items-center gap-3 mb-10 px-2">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+            {config?.logoUrl ? (
+              <img src={config.logoUrl} className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined">
+                icecream
+              </span>)}
           </div>
           <div>
             <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
@@ -112,9 +124,8 @@ export default function AdminMedia() {
             { label: "Configuración", icon: "settings", path: "/admin/configuracion" },
           ].map((item) => (
             <button key={item.label} onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] leading-[20px] transition-colors ${
-                location.pathname === item.path ? "bg-[#ffd9df] text-[#761235] font-semibold" : "text-[#564245] hover:bg-[#f3f4f5]"
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] leading-[20px] transition-colors ${location.pathname === item.path ? "bg-[#ffd9df] text-[#761235] font-semibold" : "text-[#564245] hover:bg-[#f3f4f5]"
+                }`}
             >
               <span className="material-symbols-outlined">{item.icon}</span> {item.label}
             </button>
@@ -159,7 +170,7 @@ export default function AdminMedia() {
 
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[1,2,3,4,5,6,7,8].map((i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div key={i} className="aspect-square bg-gray-200 rounded-2xl animate-pulse" />
               ))}
             </div>
