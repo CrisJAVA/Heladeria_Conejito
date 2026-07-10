@@ -145,7 +145,7 @@ public class UsuarioService {
             List<LocalDateTime> fechas = pedidoRepository.findLastOrderDateByUsuarioId(u.getId());
             dto.setUltimoPedido(fechas.isEmpty() ? null : fechas.get(0));
 
-            Puntos puntos = puntosRepository.findByUsuarioId(u.getId()).orElse(null);
+            Puntos puntos = puntosRepository.findByUsuario_Id(u.getId()).orElse(null);
             if (puntos == null) {
                 puntos = new Puntos();
                 puntos.setUsuario(u);

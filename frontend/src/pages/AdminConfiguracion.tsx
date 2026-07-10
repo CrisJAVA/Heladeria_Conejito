@@ -1,9 +1,56 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
+import { obtenerConfiguracion, actualizarConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
+
+const CONFIG_DEFAULT: ConfiguracionDTO = {
+  nombreNegocio: "Heladería Ica",
+  descripcion: "Tu oasis de frescura en el corazón de Ica. Helados artesanales y pizzas deliciosas desde 2020.",
+  direccion: "Av. Principal 123, Ica, Perú",
+  telefono: "+51 956 789 123",
+  email: "hola@heladeriaica.pe",
+  horarioSemana: "10:00 - 22:00",
+  horarioSabado: "09:00 - 23:00",
+  horarioDomingo: "09:00 - 23:00",
+  instagram: "@heladeria.ica",
+  facebook: "Heladería Ica",
+  whatsapp: "+51 956 789 123",
+  metodosPago: "Efectivo,Tarjeta,Yape,Plin,Transferencia",
+  puntosPorSol: 10,
+  puntosRecompensa: 3000,
+};
 
 export default function AdminConfiguracion() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [config, setConfig] = useState<ConfiguracionDTO>(CONFIG_DEFAULT);
+  const [guardando, setGuardando] = useState(false);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => toast.error("Error al cargar la configuración"));
+  }, []);
+
+  const campo = (key: keyof ConfiguracionDTO) => ({
+    value: (config[key] as any) ?? "",
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setConfig((prev) => ({ ...prev, [key]: e.target.value })),
+  });
+
+  const handleGuardar = async () => {
+    setGuardando(true);
+    try {
+      const actualizado = await actualizarConfiguracion(config);
+      setConfig(actualizado);
+      toast.success("Configuración guardada correctamente");
+    } catch {
+      toast.error("Error al guardar la configuración. Verifica que tengas sesión de administrador.");
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
@@ -136,7 +183,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="Heladería Ica"
+                    {...campo("nombreNegocio")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -144,7 +191,7 @@ export default function AdminConfiguracion() {
                   <textarea
                     className="w-full p-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none resize-none text-[14px]"
                     rows={4}
-                    defaultValue="Tu oasis de frescura en el corazón de Ica. Helados artesanales y pizzas deliciosas desde 2020."
+                    {...campo("descripcion")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -176,7 +223,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="Av. Principal 123, Ica, Perú"
+                    {...campo("direccion")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -186,7 +233,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="+51 956 789 123"
+                    {...campo("telefono")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -196,7 +243,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="email"
-                    defaultValue="hola@heladeriaica.pe"
+                    {...campo("email")}
                   />
                 </div>
               </div>
@@ -215,7 +262,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="10:00 - 22:00"
+                    {...campo("horarioSemana")}
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -223,7 +270,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="09:00 - 23:00"
+                    {...campo("horarioSabado")}
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -231,7 +278,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="09:00 - 23:00"
+                    {...campo("horarioDomingo")}
                   />
                 </div>
               </div>
@@ -252,7 +299,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="@heladeria.ica"
+                    {...campo("instagram")}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -262,7 +309,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="Heladería Ica"
+                    {...campo("facebook")}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -272,7 +319,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="+51 956 789 123"
+                    {...campo("whatsapp")}
                   />
                 </div>
               </div>
@@ -304,7 +351,8 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="number"
-                    defaultValue={10}
+                    value={config.puntosPorSol}
+                    onChange={(e) => setConfig((prev) => ({ ...prev, puntosPorSol: Number(e.target.value) }))}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -312,16 +360,21 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="number"
-                    defaultValue={3000}
+                    value={config.puntosRecompensa}
+                    onChange={(e) => setConfig((prev) => ({ ...prev, puntosRecompensa: Number(e.target.value) }))}
                   />
                 </div>
               </div>
             </section>
 
             <div className="lg:col-span-12 flex justify-start pb-8">
-              <button className="flex items-center gap-3 bg-[#ff7e9d] text-[#761235] px-10 py-4 rounded-2xl font-bold shadow-[0px_10px_30px_rgba(255,126,157,0.12)] hover:brightness-105 active:scale-95 transition-all duration-150">
+              <button
+                onClick={handleGuardar}
+                disabled={guardando}
+                className="flex items-center gap-3 bg-[#ff7e9d] text-[#761235] px-10 py-4 rounded-2xl font-bold shadow-[0px_10px_30px_rgba(255,126,157,0.12)] hover:brightness-105 active:scale-95 transition-all duration-150 disabled:opacity-60"
+              >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
-                Guardar Cambios
+                {guardando ? "Guardando..." : "Guardar Cambios"}
               </button>
             </div>
           </div>

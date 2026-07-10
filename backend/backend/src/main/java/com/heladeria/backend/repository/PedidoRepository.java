@@ -16,6 +16,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByEstadoOrderByCreatedAtDesc(String estado);
     List<Pedido> findByCreatedAtBetween(LocalDateTime desde, LocalDateTime hasta);
 
+    List<Pedido> findAllByOrderByCreatedAtDesc();
+    
     long countByUsuarioId(Long usuarioId);
 
     @Query("SELECT COALESCE(SUM(p.total), 0) FROM Pedido p WHERE p.usuario.id = :usuarioId AND p.estado = 'ENTREGADO'")

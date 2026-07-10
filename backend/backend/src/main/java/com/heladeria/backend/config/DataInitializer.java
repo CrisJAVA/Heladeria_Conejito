@@ -217,11 +217,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Transactional
     public void inicializarFakeClientes() {
-        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
-        NivelFidelizacion plata = nivelFidelizacionRepository.findFirstByNombre("Plata").orElse(null);
-        NivelFidelizacion oro = nivelFidelizacionRepository.findFirstByNombre("Oro").orElse(null);
-        NivelFidelizacion diamante = nivelFidelizacionRepository.findFirstByNombre("Diamante").orElse(null);
-
+NivelFidelizacion bronce = nivelFidelizacionRepository.findByNombre("Bronce").orElse(null);
+NivelFidelizacion plata = nivelFidelizacionRepository.findByNombre("Plata").orElse(null);
+NivelFidelizacion oro = nivelFidelizacionRepository.findByNombre("Oro").orElse(null);
+NivelFidelizacion diamante = nivelFidelizacionRepository.findByNombre("Diamante").orElse(null);
         String[][] fakeUsers = {
             {"María García", "maria@email.com", "987654321", "Jr. Lima 456, Ica", "Plata", "350", "450"},
             {"Carlos López", "carlos@email.com", "976543210", "Av. Grau 789, Ica", "Oro", "520", "1200"},
@@ -264,11 +263,10 @@ public class DataInitializer implements CommandLineRunner {
         @Transactional
     public void inicializarProductos() {
         if (productoRepository.count() == 0) {
-            Categoria helados = categoriaRepository.findFirstByNombre("Helados").orElse(null);
-            Categoria raspadillas = categoriaRepository.findFirstByNombre("Raspadillas").orElse(null);
-            Categoria bebidas = categoriaRepository.findFirstByNombre("Bebidas").orElse(null);
-            Categoria pizzas = categoriaRepository.findFirstByNombre("Pizzas").orElse(null);
-
+Categoria helados = categoriaRepository.findByNombre("Helados").orElse(null);
+Categoria raspadillas = categoriaRepository.findByNombre("Raspadillas").orElse(null);
+Categoria bebidas = categoriaRepository.findByNombre("Bebidas").orElse(null);
+Categoria pizzas = categoriaRepository.findByNombre("Pizzas").orElse(null);
             java.util.function.Function<String, String> img = t -> "https://placehold.co/400x300/ffd9df/a43756?text=" + t;
 
             if (helados != null) {
