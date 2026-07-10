@@ -47,9 +47,7 @@ function LandingPage() {
         <Social />
       </main>
       <Footer />
-      <button onClick={() => navigate("/admin")} className="fixed bottom-6 right-6 w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 transition-colors z-50 border border-gray-200" title="Panel de Administración">
-        🔒
-      </button>
+
     </div>
   );
 }

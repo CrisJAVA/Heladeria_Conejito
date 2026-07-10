@@ -112,7 +112,7 @@ export default function Navbar() {
                   {puntos?.afiliado && (
                     <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#fff8e1] text-[10px] font-bold text-[#8d6e00] border border-[#ffd700]/30">
                       <Star className="w-3 h-3" />
-                      {puntos.puntosAcumulados}
+                      {puntos.puntosActuales}
                     </span>
                   )}
                 </motion.button>
@@ -138,7 +138,7 @@ export default function Navbar() {
                               <Trophy className="w-4 h-4 text-[#8d6e00]" />
                               <span className="text-xs font-bold text-[#8d6e00]">{puntos.nivel || "Bronce"}</span>
                             </div>
-                            <span className="text-xs font-bold text-[#8d6e00]">{puntos.puntosAcumulados} pts</span>
+                            <span className="text-xs font-bold text-[#8d6e00]">{puntos.puntosActuales} pts <span className="font-normal opacity-60">disp.</span></span>
                           </div>
                         </div>
                       )}
@@ -266,7 +266,7 @@ export default function Navbar() {
                     </div>
                     {puntos?.afiliado && (
                       <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#fff8e1] text-[10px] font-bold text-[#8d6e00]">
-                        <Star className="w-3 h-3" /> {puntos.puntosAcumulados} pts
+                        <Star className="w-3 h-3" /> {puntos.puntosActuales} pts
                       </span>
                     )}
                   </div>

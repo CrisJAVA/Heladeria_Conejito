@@ -35,6 +35,7 @@ public class PuntosController {
     @Transactional(readOnly = true)
     public ResponseEntity<PuntosDTO> obtenerMisPuntos(@AuthenticationPrincipal UserPrincipal principal) {
         Puntos puntos = puntosRepository.findByUsuario_Id(principal.userId()).orElse(null);
+
         PuntosDTO dto = new PuntosDTO();
         dto.setAfiliado(puntos != null);
         if (puntos != null) {
@@ -53,6 +54,7 @@ public class PuntosController {
     @Transactional
     public ResponseEntity<?> afiliarse(@AuthenticationPrincipal UserPrincipal principal) {
         if (puntosRepository.findByUsuario_Id(principal.userId()).isPresent()) {
+
             return ResponseEntity.badRequest().body(Map.of("error", "Ya estás afiliado al programa de fidelización"));
         }
 

@@ -14,6 +14,7 @@ export interface PedidoRequest {
   direccionEntrega?: string;
   numeroOperacion?: string;
   nota?: string;
+  puntosUsados?: number;
   detalles: DetalleRequest[];
 }
 
