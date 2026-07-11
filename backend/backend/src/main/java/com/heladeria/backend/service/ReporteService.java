@@ -36,7 +36,7 @@ public class ReporteService {
         }
 
         List<Pedido> pedidosCompletados = pedidos.stream()
-                .filter(p -> "ENTREGADO".equals(p.getEstado()) || "CONFIRMADO".equals(p.getEstado()))
+                .filter(p -> "ENTREGADO".equals(p.getEstado()))
                 .collect(Collectors.toList());
 
         BigDecimal ventasTotales = pedidosCompletados.stream()
@@ -55,7 +55,7 @@ public class ReporteService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         Map<String, Long> pedidosPorEstado = new LinkedHashMap<>();
-        Arrays.asList("PENDIENTE", "CONFIRMADO", "PREPARANDO", "EN_CAMINO", "ENTREGADO", "CANCELADO")
+        Arrays.asList("PENDIENTE", "EN PREPARACION", "LISTO", "ENTREGADO", "CANCELADO")
                 .forEach(e -> pedidosPorEstado.put(e, pedidos.stream()
                         .filter(p -> e.equals(p.getEstado())).count()));
         reporte.setPedidosPorEstado(pedidosPorEstado);
@@ -77,6 +77,7 @@ public class ReporteService {
         Map<Long, ReporteVentasDTO.ProductoTop> productosMap = new HashMap<>();
         for (Pedido pedido : pedidosCompletados) {
             for (DetallePedido det : pedido.getDetalles()) {
+                if (det.getProducto() == null) continue;
                 ReporteVentasDTO.ProductoTop top = productosMap
                         .computeIfAbsent(det.getProducto().getId(), k -> {
                             ReporteVentasDTO.ProductoTop pt = new ReporteVentasDTO.ProductoTop();

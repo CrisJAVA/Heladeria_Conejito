@@ -53,9 +53,9 @@ export default function ProfilePage() {
     if (token) {
       listarMisPedidos()
         .then(setOrders)
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => setLoadingOrders(false));
-      obtenerMisPuntos().then(setMisPuntos).catch(() => {});
+      obtenerMisPuntos().then(setMisPuntos).catch(() => { });
     }
   }, [token]);
 
@@ -141,7 +141,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fffbf7] flex flex-col pb-32">
+    <div className="min-h-screen bg-[#fffbf7] flex flex-col">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="flex items-center justify-between px-4 md:px-8 py-4 max-w-5xl mx-auto w-full">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-[#ff6b9d] transition-colors font-medium">

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { obtenerMisPuntos, type MisPuntos } from "../../services/puntos";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../../services/configuracion";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,11 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const [puntos, setPuntos] = useState<MisPuntos | null>(null);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+
+  useEffect(() => {
+    obtenerConfiguracion().then(setConfig).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -62,11 +68,15 @@ export default function Navbar() {
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
-              <IceCream className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center overflow-hidden">
+              {config?.logoUrl ? (
+                <img src={config.logoUrl} alt={config.nombreNegocio || "Logo"} className="w-full h-full object-cover" />
+              ) : (
+                <IceCream className="w-6 h-6 text-white" />
+              )}
             </div>
             <div>
-              <div className="font-bold text-xl text-[#2d2d2d]">Heladería Ica</div>
+              <div className="font-bold text-xl text-[#2d2d2d]">{config?.nombreNegocio || "Heladería Ica"}</div>
               <div className="text-xs text-gray-600">Sabor artesanal</div>
             </div>
           </motion.div>

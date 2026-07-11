@@ -57,6 +57,9 @@ public class Pedido {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "puntos_usados")
+    private Integer puntosUsados = 0;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
 
@@ -74,32 +77,123 @@ public class Pedido {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getCodigoPedido() { return codigoPedido; }
-    public void setCodigoPedido(String codigoPedido) { this.codigoPedido = codigoPedido; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public MetodoEntrega getMetodoEntrega() { return metodoEntrega; }
-    public void setMetodoEntrega(MetodoEntrega metodoEntrega) { this.metodoEntrega = metodoEntrega; }
-    public MetodoPago getMetodoPago() { return metodoPago; }
-    public void setMetodoPago(MetodoPago metodoPago) { this.metodoPago = metodoPago; }
-    public BigDecimal getSubtotal() { return subtotal; }
-    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
-    public BigDecimal getCostoEnvio() { return costoEnvio; }
-    public void setCostoEnvio(BigDecimal costoEnvio) { this.costoEnvio = costoEnvio; }
-    public BigDecimal getTotal() { return total; }
-    public void setTotal(BigDecimal total) { this.total = total; }
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
-    public String getDireccionEntrega() { return direccionEntrega; }
-    public void setDireccionEntrega(String direccionEntrega) { this.direccionEntrega = direccionEntrega; }
-    public String getNumeroOperacion() { return numeroOperacion; }
-    public void setNumeroOperacion(String numeroOperacion) { this.numeroOperacion = numeroOperacion; }
-    public String getNota() { return nota; }
-    public void setNota(String nota) { this.nota = nota; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public List<DetallePedido> getDetalles() { return detalles; }
-    public void setDetalles(List<DetallePedido> detalles) { this.detalles = detalles; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCodigoPedido() {
+        return codigoPedido;
+    }
+
+    public void setCodigoPedido(String codigoPedido) {
+        this.codigoPedido = codigoPedido;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public MetodoEntrega getMetodoEntrega() {
+        return metodoEntrega;
+    }
+
+    public void setMetodoEntrega(MetodoEntrega metodoEntrega) {
+        this.metodoEntrega = metodoEntrega;
+    }
+
+    public MetodoPago getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(MetodoPago metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public BigDecimal getCostoEnvio() {
+        return costoEnvio;
+    }
+
+    public void setCostoEnvio(BigDecimal costoEnvio) {
+        this.costoEnvio = costoEnvio;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getDireccionEntrega() {
+        return direccionEntrega;
+    }
+
+    public void setDireccionEntrega(String direccionEntrega) {
+        this.direccionEntrega = direccionEntrega;
+    }
+
+    public String getNumeroOperacion() {
+        return numeroOperacion;
+    }
+
+    public void setNumeroOperacion(String numeroOperacion) {
+        this.numeroOperacion = numeroOperacion;
+    }
+
+    public String getNota() {
+        return nota;
+    }
+
+    public void setNota(String nota) {
+        this.nota = nota;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public List<DetallePedido> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetallePedido> detalles) {
+        this.detalles = detalles;
+    }
+
+    public Integer getPuntosUsados() {
+        return puntosUsados;
+    }
+
+    public void setPuntosUsados(Integer puntosUsados) {
+        this.puntosUsados = puntosUsados;
+    }
 }

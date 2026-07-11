@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { IceCream, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../app/components/Footer";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,6 +15,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => {
+        console.log("No se pudo cargar configuración");
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +50,11 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-md">
           <div className="text-center mb-8">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }} className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <IceCream className="w-8 h-8 text-white" />
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }} className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden" >
+              {config?.logoUrl ? (
+                <img src={config.logoUrl} alt={config.nombreNegocio || "Logo"} className="w-full h-full object-cover" />) : (
+                <IceCream className="w-8 h-8 text-white" />
+              )}
             </motion.div>
             <h1 className="text-2xl font-bold text-[#2d2d2d]">Iniciar Sesión</h1>
             <p className="text-gray-500 text-sm mt-1">Ingresa a tu cuenta para pedir más rápido</p>

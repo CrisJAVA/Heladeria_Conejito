@@ -11,6 +11,8 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { crearPedido } from "../services/pedidos";
 import { obtenerMisPuntos, type MisPuntos } from "../services/puntos";
+import { listarMetodosEntrega, listarMetodosPago, type MetodoEntregaDTO, type MetodoPagoDTO } from "../services/metodos";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 import Footer from "../app/components/Footer";
 
 const SHIPPING_COST = 8;
@@ -58,6 +60,15 @@ export default function CartPage() {
   const [showCardCvv, setShowCardCvv] = useState(false);
   const [misPuntos, setMisPuntos] = useState<MisPuntos | null>(null);
   const [puntosUsar, setPuntosUsar] = useState(0);
+  const [metodosEntrega, setMetodosEntrega] = useState<MetodoEntregaDTO[]>([]);
+  const [metodosPagoDb, setMetodosPagoDb] = useState<MetodoPagoDTO[]>([]);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+
+  useEffect(() => {
+    listarMetodosEntrega().then(setMetodosEntrega).catch(() => {});
+    listarMetodosPago().then(setMetodosPagoDb).catch(() => {});
+    obtenerConfiguracion().then(setConfig).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -75,8 +86,33 @@ export default function CartPage() {
   const descuentoPuntos = puntosUsar * PUNTO_VALOR;
   const totalConPuntos = Math.max(0, total - descuentoPuntos);
 
-  const metodoPagoId = paymentMethod === "yape" ? 1 : paymentMethod === "plin" ? 2 : paymentMethod === "card" ? 3 : paymentMethod === "puntos" ? 5 : 4;
-  const metodoEntregaId = deliveryMethod === "pickup" ? 1 : 2;
+  const nombrePagoPorMetodo: Record<string, string> = {
+    yape: "Yape",
+    plin: "Plin",
+    card: "Tarjeta",
+    cash: "Efectivo",
+    puntos: "Puntos",
+  };
+  const nombreEntregaPorMetodo: Record<string, string> = {
+    pickup: "Recojo en tienda",
+    delivery: "Delivery",
+  };
+
+  const metodoPagoId = paymentMethod
+    ? metodosPagoDb.find((m) => m.nombre.toLowerCase() === (nombrePagoPorMetodo[paymentMethod] || "").toLowerCase())?.id
+    : undefined;
+  const metodoEntregaId = metodosEntrega.find(
+    (m) => m.nombre.toLowerCase() === nombreEntregaPorMetodo[deliveryMethod].toLowerCase()
+  )?.id;
+
+  const metodosPagoHabilitados = config?.metodosPago
+    ? config.metodosPago.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
+    : null;
+  const metodoPagoVisible = (id: string) => {
+    if (id === "puntos") return true;
+    if (!metodosPagoHabilitados) return true;
+    return metodosPagoHabilitados.includes((nombrePagoPorMetodo[id] || "").toLowerCase());
+  };
 
   const handleConfirmClick = () => {
     if (!user) { toast.error("Debes iniciar sesión para realizar un pedido"); navigate("/login"); return; }
@@ -96,6 +132,11 @@ export default function CartPage() {
   };
 
   const handlePlaceOrder = async (numeroOperacion?: string) => {
+    if (!metodoEntregaId || !metodoPagoId) {
+      toast.error("No se pudo determinar el método de entrega o pago. Intenta recargar la página.");
+      setPaymentStep("select");
+      return;
+    }
     setProcessing(true);
     setPaymentStep("confirming");
     try {
@@ -281,7 +322,7 @@ export default function CartPage() {
                         { id: "card", icon: CreditCard, label: "Tarjeta" },
                         { id: "cash", icon: Banknote, label: "Efectivo" },
                         ...(user ? [{ id: "puntos" as const, icon: Star, label: "Puntos" }] : []),
-                      ].map((method) => (
+                      ].filter((method) => metodoPagoVisible(method.id)).map((method) => (
                         <label key={method.id} onClick={() => setPaymentMethod(method.id)} className={`flex flex-col items-center justify-center p-4 border rounded-2xl cursor-pointer transition-all ${paymentMethod === method.id ? "border-[#ff6b9d] bg-[#ffd9df] ring-2 ring-[#ff6b9d]/20" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
                           <method.icon className={`w-8 h-8 mb-2 ${paymentMethod === method.id ? "text-[#ff6b9d]" : "text-gray-400"}`} />
                           <span className={`font-semibold text-sm ${paymentMethod === method.id ? "text-[#ff6b9d]" : "text-[#2d2d2d]"}`}>{method.label}</span>

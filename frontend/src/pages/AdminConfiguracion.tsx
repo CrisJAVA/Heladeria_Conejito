@@ -1,9 +1,80 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
+import { obtenerConfiguracion, actualizarConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
+import { subirImagen } from "../services/upload";
+
+const CONFIG_DEFAULT: ConfiguracionDTO = {
+  nombreNegocio: "Heladería Ica",
+  descripcion: "Tu oasis de frescura en el corazón de Ica. Helados artesanales y pizzas deliciosas desde 2020.",
+  direccion: "Av. Principal 123, Ica, Perú",
+  telefono: "+51 956 789 123",
+  email: "hola@heladeriaica.pe",
+  horarioSemana: "10:00 - 22:00",
+  horarioSabado: "09:00 - 23:00",
+  horarioDomingo: "09:00 - 23:00",
+  instagram: "@heladeria.ica",
+  facebook: "Heladería Ica",
+  whatsapp: "+51 956 789 123",
+  metodosPago: "Efectivo,Tarjeta,Yape,Plin,Transferencia",
+  puntosPorSol: 10,
+  puntosRecompensa: 3000,
+};
 
 export default function AdminConfiguracion() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [config, setConfig] = useState<ConfiguracionDTO>(CONFIG_DEFAULT);
+  const [guardando, setGuardando] = useState(false);
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const [logo, setLogo] = useState<string>("");
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then((data) => {
+        setConfig(data);
+        setLogo(data.logoUrl || "");
+      })
+      .catch(() => toast.error("Error al cargar la configuración"));
+  }, []);
+
+  const campo = (key: keyof ConfiguracionDTO) => ({
+    value: (config[key] as any) ?? "",
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setConfig((prev) => ({ ...prev, [key]: e.target.value })),
+  });
+
+  const handleGuardar = async () => {
+    setGuardando(true);
+    try {
+      const actualizado = await actualizarConfiguracion(config);
+      setConfig(actualizado);
+      toast.success("Configuración guardada correctamente");
+    } catch {
+      toast.error("Error al guardar la configuración. Verifica que tengas sesión de administrador.");
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setSubiendoLogo(true);
+    try {
+      const { url } = await subirImagen(file);
+      const fullUrl = url.startsWith("http") ? url : `http://localhost:8080${url}`;
+      const actualizado = await actualizarConfiguracion({ ...config, logoUrl: fullUrl });
+      setConfig(actualizado);
+      toast.success("Logo actualizado correctamente");
+    } catch {
+      toast.error("Error al subir el logo. Verifica que tengas sesión de administrador.");
+    } finally {
+      setSubiendoLogo(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
@@ -27,8 +98,13 @@ export default function AdminConfiguracion() {
 
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] flex flex-col py-6 px-4 bg-white z-50">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm overflow-hidden">
+            {logo ? (
+              <img src={logo} alt="Logo" className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }} >
+                icecream
+              </span>
+            )}
           </div>
           <div>
             <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
@@ -136,7 +212,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="Heladería Ica"
+                    {...campo("nombreNegocio")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -144,17 +220,33 @@ export default function AdminConfiguracion() {
                   <textarea
                     className="w-full p-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none resize-none text-[14px]"
                     rows={4}
-                    defaultValue="Tu oasis de frescura en el corazón de Ica. Helados artesanales y pizzas deliciosas desde 2020."
+                    {...campo("descripcion")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[12px] leading-[16px] text-[#564245]">Logo</label>
                   <div className="flex items-center gap-6">
                     <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-[#ff7e9d] to-[#ffe173] p-4 shadow-sm flex items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-[#761235]">icecream</span>
+                      {config.logoUrl ? (
+                        <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="material-symbols-outlined text-4xl text-[#761235]">icecream</span>
+                      )}
                     </div>
-                    <button className="px-6 py-2.5 rounded-xl border border-[#897175] text-[#a43756] font-bold hover:bg-[#edeeef] transition-all text-sm">
-                      Cambiar Logo
+                    <input
+                      id="logo-file-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoChange}
+                    />
+                    <button
+                      type="button"
+                      disabled={subiendoLogo}
+                      onClick={() => document.getElementById("logo-file-input")?.click()}
+                      className="px-6 py-2.5 rounded-xl border border-[#897175] text-[#a43756] font-bold hover:bg-[#edeeef] transition-all text-sm disabled:opacity-50"
+                    >
+                      {subiendoLogo ? "Subiendo..." : "Cambiar Logo"}
                     </button>
                   </div>
                 </div>
@@ -176,7 +268,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="Av. Principal 123, Ica, Perú"
+                    {...campo("direccion")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -186,7 +278,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="text"
-                    defaultValue="+51 956 789 123"
+                    {...campo("telefono")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -196,7 +288,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="email"
-                    defaultValue="hola@heladeriaica.pe"
+                    {...campo("email")}
                   />
                 </div>
               </div>
@@ -215,7 +307,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="10:00 - 22:00"
+                    {...campo("horarioSemana")}
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -223,7 +315,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="09:00 - 23:00"
+                    {...campo("horarioSabado")}
                   />
                 </div>
                 <div className="flex items-center gap-4">
@@ -231,7 +323,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="flex-1 h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="09:00 - 23:00"
+                    {...campo("horarioDomingo")}
                   />
                 </div>
               </div>
@@ -252,7 +344,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="@heladeria.ica"
+                    {...campo("instagram")}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -262,7 +354,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="Heladería Ica"
+                    {...campo("facebook")}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -272,7 +364,7 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] text-sm focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
                     type="text"
-                    defaultValue="+51 956 789 123"
+                    {...campo("whatsapp")}
                   />
                 </div>
               </div>
@@ -281,18 +373,31 @@ export default function AdminConfiguracion() {
             <section className="lg:col-span-12 bg-white rounded-2xl p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] space-y-6">
               <h3 className="text-[24px] leading-[32px] font-semibold">Métodos de Pago</h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"].map((method) => (
-                  <label key={method} className="group cursor-pointer">
-                    <div className="flex items-center gap-3 p-4 border border-[#dcc0c4] rounded-2xl group-hover:border-[#ff7e9d] group-hover:bg-[#ff7e9d]/5 transition-all">
-                      <input
-                        defaultChecked
-                        className="w-5 h-5 rounded border-[#dcc0c4] text-[#ff7e9d] focus:ring-[#ff7e9d] transition-all"
-                        type="checkbox"
-                      />
-                      <span className="text-sm font-medium">{method}</span>
-                    </div>
-                  </label>
-                ))}
+                {["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"].map((method) => {
+                  const seleccionados = config.metodosPago
+                    ? config.metodosPago.split(",").map((s) => s.trim()).filter(Boolean)
+                    : [];
+                  const checked = seleccionados.includes(method);
+                  const toggle = () => {
+                    const nuevos = checked
+                      ? seleccionados.filter((m) => m !== method)
+                      : [...seleccionados, method];
+                    setConfig((prev) => ({ ...prev, metodosPago: nuevos.join(",") }));
+                  };
+                  return (
+                    <label key={method} className="group cursor-pointer">
+                      <div className="flex items-center gap-3 p-4 border border-[#dcc0c4] rounded-2xl group-hover:border-[#ff7e9d] group-hover:bg-[#ff7e9d]/5 transition-all">
+                        <input
+                          checked={checked}
+                          onChange={toggle}
+                          className="w-5 h-5 rounded border-[#dcc0c4] text-[#ff7e9d] focus:ring-[#ff7e9d] transition-all"
+                          type="checkbox"
+                        />
+                        <span className="text-sm font-medium">{method}</span>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             </section>
 
@@ -304,7 +409,8 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="number"
-                    defaultValue={10}
+                    value={config.puntosPorSol}
+                    onChange={(e) => setConfig((prev) => ({ ...prev, puntosPorSol: Number(e.target.value) }))}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -312,16 +418,21 @@ export default function AdminConfiguracion() {
                   <input
                     className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
                     type="number"
-                    defaultValue={3000}
+                    value={config.puntosRecompensa}
+                    onChange={(e) => setConfig((prev) => ({ ...prev, puntosRecompensa: Number(e.target.value) }))}
                   />
                 </div>
               </div>
             </section>
 
             <div className="lg:col-span-12 flex justify-start pb-8">
-              <button className="flex items-center gap-3 bg-[#ff7e9d] text-[#761235] px-10 py-4 rounded-2xl font-bold shadow-[0px_10px_30px_rgba(255,126,157,0.12)] hover:brightness-105 active:scale-95 transition-all duration-150">
+              <button
+                onClick={handleGuardar}
+                disabled={guardando}
+                className="flex items-center gap-3 bg-[#ff7e9d] text-[#761235] px-10 py-4 rounded-2xl font-bold shadow-[0px_10px_30px_rgba(255,126,157,0.12)] hover:brightness-105 active:scale-95 transition-all duration-150 disabled:opacity-60"
+              >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
-                Guardar Cambios
+                {guardando ? "Guardando..." : "Guardar Cambios"}
               </button>
             </div>
           </div>

@@ -1,8 +1,16 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { IceCream, MapPin, Phone, Mail, Clock, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../../services/configuracion";
 
 export default function Footer() {
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+
+  useEffect(() => {
+    obtenerConfiguracion().then(setConfig).catch(() => {});
+  }, []);
+
   return (
     <footer className="bg-gradient-to-br from-[#2d2d2d] to-[#1a1a1a] text-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
@@ -10,10 +18,14 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center">
-                <IceCream className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center overflow-hidden">
+                {config?.logoUrl ? (
+                  <img src={config.logoUrl} alt={config.nombreNegocio || "Logo"} className="w-full h-full object-cover" />
+                ) : (
+                  <IceCream className="w-6 h-6 text-white" />
+                )}
               </div>
-              <span className="text-2xl font-bold">Heladería Ica</span>
+              <span className="text-2xl font-bold">{config?.nombreNegocio || "Heladería Ica"}</span>
             </div>
             <p className="text-gray-400 mb-6">
               Tu oasis de frescura en el corazón de Ica. Helados artesanales y pizzas deliciosas desde 2020.

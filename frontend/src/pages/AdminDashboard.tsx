@@ -5,6 +5,7 @@ import { obtenerReporte, type ReporteVentas } from "../services/reportes";
 import { listarPedidos, actualizarEstadoPedido, type PedidoResponse } from "../services/pedidos";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
   const [reporte, setReporte] = useState<ReporteVentas | null>(null);
   const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -41,6 +43,12 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
+  }, []);
 
   const ventasPeriodo = reporte?.ventasPorPeriodo
     ? Object.entries(reporte.ventasPorPeriodo).map(([fecha, total]) => ({ fecha, total }))
@@ -67,7 +75,11 @@ export default function AdminDashboard() {
       <aside className="w-64 bg-white border-r border-[#e1e3e4] flex flex-col fixed inset-y-0 left-0 z-50 py-6 px-4">
         <div className="flex items-center gap-3 px-2">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+            {config?.logoUrl ? (
+              <img src={config.logoUrl} className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined">
+                icecream
+              </span>)}
           </div>
           <div><h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin</h1><p className="text-xs text-[#564245]">Heladería Ica</p></div>
         </div>

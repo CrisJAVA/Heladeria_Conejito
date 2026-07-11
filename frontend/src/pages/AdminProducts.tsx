@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import ProductModal from "../app/components/ProductModal";
 import { listarProductos, eliminarProducto, type ProductoDTO } from "../services/productos";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 const filters = ["Todos", "Helados", "Pizzas", "Bebidas", "Combos"];
 
@@ -16,6 +17,7 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<ProductoDTO | null>(null);
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -31,6 +33,12 @@ export default function AdminProducts() {
 
   useEffect(() => {
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
   }, []);
 
   const filteredProducts = products.filter((p) => {
@@ -62,7 +70,11 @@ export default function AdminProducts() {
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] bg-white flex flex-col py-6 px-4 z-50">
         <div className="mb-10 px-2 flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+            {config?.logoUrl ? (
+              <img src={config.logoUrl} className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined">
+                icecream
+              </span>)}
           </div>
           <div>
             <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
@@ -182,11 +194,10 @@ export default function AdminProducts() {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-5 py-2.5 rounded-2xl text-[14px] transition-all ${
-                    filter === f
-                      ? "bg-[#ff7e9d] text-[#761235] font-bold"
-                      : "text-[#564245] hover:bg-[#e7e8e9]"
-                  }`}
+                  className={`px-5 py-2.5 rounded-2xl text-[14px] transition-all ${filter === f
+                    ? "bg-[#ff7e9d] text-[#761235] font-bold"
+                    : "text-[#564245] hover:bg-[#e7e8e9]"
+                    }`}
                 >
                   {f}
                 </button>
@@ -228,13 +239,12 @@ export default function AdminProducts() {
                       }}
                     />
                     <div
-                      className={`absolute top-4 right-4 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg ${
-                        !product.disponible
-                          ? "bg-[#ba1a1a] text-white"
-                          : product.stock <= 5
-                            ? "bg-[#fdd73b] text-[#554500]"
-                            : "bg-[#22c55e] text-white"
-                      }`}
+                      className={`absolute top-4 right-4 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg ${!product.disponible
+                        ? "bg-[#ba1a1a] text-white"
+                        : product.stock <= 5
+                          ? "bg-[#fdd73b] text-[#554500]"
+                          : "bg-[#22c55e] text-white"
+                        }`}
                     >
                       {!product.disponible ? "Agotado" : product.stock <= 5 ? "Bajo stock" : "Disponible"}
                     </div>

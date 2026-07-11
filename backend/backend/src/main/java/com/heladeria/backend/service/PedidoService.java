@@ -29,15 +29,15 @@ public class PedidoService {
     private final NivelFidelizacionRepository nivelFidelizacionRepository;
 
     public PedidoService(PedidoRepository pedidoRepository,
-                         UsuarioRepository usuarioRepository,
-                         MetodoEntregaRepository metodoEntregaRepository,
-                         MetodoPagoRepository metodoPagoRepository,
-                         ProductoRepository productoRepository,
-                         PedidoWebSocketHandler wsHandler,
-                         NotificacionService notificacionService,
-                         PuntosRepository puntosRepository,
-                         HistorialPuntosRepository historialPuntosRepository,
-                         NivelFidelizacionRepository nivelFidelizacionRepository) {
+            UsuarioRepository usuarioRepository,
+            MetodoEntregaRepository metodoEntregaRepository,
+            MetodoPagoRepository metodoPagoRepository,
+            ProductoRepository productoRepository,
+            PedidoWebSocketHandler wsHandler,
+            NotificacionService notificacionService,
+            PuntosRepository puntosRepository,
+            HistorialPuntosRepository historialPuntosRepository,
+            NivelFidelizacionRepository nivelFidelizacionRepository) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.metodoEntregaRepository = metodoEntregaRepository;
@@ -107,19 +107,22 @@ public class PedidoService {
         BigDecimal total = subtotal.add(entrega.getCosto());
 
         if (request.getPuntosUsados() != null && request.getPuntosUsados() > 0) {
-            Puntos puntos = puntosRepository.findByUsuarioId(usuarioId)
+            Puntos puntos = puntosRepository.findByUsuario_Id(usuarioId)
                     .orElseThrow(() -> new RuntimeException("No estás afiliado al programa de fidelización"));
 
             if (puntos.getPuntosActuales() < request.getPuntosUsados()) {
-                throw new RuntimeException("Puntos insuficientes. Tienes " + puntos.getPuntosActuales() + " puntos disponibles.");
+                throw new RuntimeException(
+                        "Puntos insuficientes. Tienes " + puntos.getPuntosActuales() + " puntos disponibles.");
             }
 
             BigDecimal descuento = BigDecimal.valueOf(request.getPuntosUsados() * 0.05);
             total = total.subtract(descuento);
-            if (total.compareTo(BigDecimal.ZERO) < 0) total = BigDecimal.ZERO;
+            if (total.compareTo(BigDecimal.ZERO) < 0)
+                total = BigDecimal.ZERO;
 
             puntos.setPuntosActuales(puntos.getPuntosActuales() - request.getPuntosUsados());
             puntosRepository.save(puntos);
+            pedido.setPuntosUsados(request.getPuntosUsados());
         }
 
         pedido.setTotal(total);
@@ -149,8 +152,7 @@ public class PedidoService {
                 "Pedido creado",
                 "Tu pedido " + pedido.getCodigoPedido() + " ha sido registrado correctamente",
                 "PEDIDO",
-                pedido.getId()
-        );
+                pedido.getId());
 
         return toResponse(pedido);
     }
@@ -184,6 +186,10 @@ public class PedidoService {
     public PedidoResponse actualizarEstado(Long pedidoId, String estado) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+        if ("CANCELADO".equals(estado)) {
+            devolverPuntosPedidoCancelado(pedido);
+        }
+
         pedido.setEstado(estado);
         pedido = pedidoRepository.save(pedido);
 
@@ -203,22 +209,23 @@ public class PedidoService {
                 "Pedido actualizado",
                 "Tu pedido " + pedido.getCodigoPedido() + " ahora está: " + estado,
                 "ESTADO",
-                pedido.getId()
-        );
+                pedido.getId());
 
         return toResponse(pedido);
     }
 
     private void sumarPuntosPorPedido(Pedido pedido) {
         Long usuarioId = pedido.getUsuario().getId();
-        Puntos puntos = puntosRepository.findByUsuarioId(usuarioId).orElse(null);
-        if (puntos == null) return;
+        Puntos puntos = puntosRepository.findByUsuario_Id(usuarioId).orElse(null);
+        if (puntos == null)
+            return;
 
         NivelFidelizacion nivel = puntos.getNivel();
         int ptsPorSol = (nivel != null && nivel.getPuntosPorSoles() != null) ? nivel.getPuntosPorSoles() : 5;
 
         int puntosGanados = pedido.getTotal().multiply(BigDecimal.valueOf(ptsPorSol)).intValue();
-        if (puntosGanados <= 0) return;
+        if (puntosGanados <= 0)
+            return;
 
         puntos.setPuntosActuales(puntos.getPuntosActuales() + puntosGanados);
         puntos.setPuntosAcumulados(puntos.getPuntosAcumulados() + puntosGanados);
@@ -236,6 +243,30 @@ public class PedidoService {
         historial.setPuntos(puntosGanados);
         historial.setTipo("SUMAR");
         historial.setConcepto("Compra " + pedido.getCodigoPedido());
+        historial.setReferenciaId(pedido.getId());
+        historialPuntosRepository.save(historial);
+    }
+
+    private void devolverPuntosPedidoCancelado(Pedido pedido) {
+        Integer puntosDevueltos = pedido.getPuntosUsados();
+        if (puntosDevueltos == null || puntosDevueltos <= 0) {
+            return;
+        }
+
+        Long usuarioId = pedido.getUsuario().getId();
+        Puntos puntos = puntosRepository.findByUsuario_Id(usuarioId).orElse(null);
+        if (puntos == null) {
+            return;
+        }
+
+        puntos.setPuntosActuales(puntos.getPuntosActuales() + puntosDevueltos);
+        puntosRepository.save(puntos);
+        HistorialPuntos historial = new HistorialPuntos();
+
+        historial.setUsuario(pedido.getUsuario());
+        historial.setPuntos(puntosDevueltos);
+        historial.setTipo("DEVOLVER");
+        historial.setConcepto("Devolución por cancelación pedido " + pedido.getCodigoPedido());
         historial.setReferenciaId(pedido.getId());
         historialPuntosRepository.save(historial);
     }

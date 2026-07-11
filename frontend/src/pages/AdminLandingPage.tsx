@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { listarSecciones, actualizarSeccion, type SeccionLanding } from "../services/landingPage";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 export default function AdminLandingPage() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function AdminLandingPage() {
   const [secciones, setSecciones] = useState<SeccionLanding[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -25,6 +27,12 @@ export default function AdminLandingPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
+  }, []);
 
   const handleSave = async (sec: SeccionLanding) => {
     setSaving(sec.sectionKey);
@@ -54,7 +62,11 @@ export default function AdminLandingPage() {
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] flex flex-col py-6 px-4 bg-white z-50">
         <div className="flex items-center gap-3 mb-10 px-2">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+            {config?.logoUrl ? (
+              <img src={config.logoUrl} className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined">
+                icecream
+              </span>)}
           </div>
           <div>
             <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
@@ -72,9 +84,8 @@ export default function AdminLandingPage() {
             { label: "Configuración", icon: "settings", path: "/admin/configuracion" },
           ].map((item) => (
             <button key={item.label} onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] leading-[20px] transition-colors ${
-                location.pathname === item.path ? "bg-[#ffd9df] text-[#761235] font-semibold" : "text-[#564245] hover:bg-[#f3f4f5]"
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] leading-[20px] transition-colors ${location.pathname === item.path ? "bg-[#ffd9df] text-[#761235] font-semibold" : "text-[#564245] hover:bg-[#f3f4f5]"
+                }`}
             >
               <span className="material-symbols-outlined">{item.icon}</span> {item.label}
             </button>
@@ -119,7 +130,7 @@ export default function AdminLandingPage() {
                       src={sec.imagenUrl}
                       alt={sec.titulo}
                       className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x400/${sec.colorFrom?.replace('#','')}/ffffff?text=${encodeURIComponent(sec.titulo)}`; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/600x400/${sec.colorFrom?.replace('#', '')}/ffffff?text=${encodeURIComponent(sec.titulo)}`; }}
                     />
                     <div className={`absolute inset-0 bg-gradient-to-t from-[${sec.colorFrom}] to-transparent opacity-30`} />
                   </div>
