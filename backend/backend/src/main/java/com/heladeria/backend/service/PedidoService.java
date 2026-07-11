@@ -103,9 +103,38 @@ public class PedidoService {
 
         pedido.setSubtotal(subtotal);
         pedido.setCostoEnvio(entrega.getCosto());
-        pedido.setTotal(subtotal.add(entrega.getCosto()));
+
+        BigDecimal total = subtotal.add(entrega.getCosto());
+
+        if (request.getPuntosUsados() != null && request.getPuntosUsados() > 0) {
+            Puntos puntos = puntosRepository.findByUsuarioId(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("No estás afiliado al programa de fidelización"));
+
+            if (puntos.getPuntosActuales() < request.getPuntosUsados()) {
+                throw new RuntimeException("Puntos insuficientes. Tienes " + puntos.getPuntosActuales() + " puntos disponibles.");
+            }
+
+            BigDecimal descuento = BigDecimal.valueOf(request.getPuntosUsados() * 0.05);
+            total = total.subtract(descuento);
+            if (total.compareTo(BigDecimal.ZERO) < 0) total = BigDecimal.ZERO;
+
+            puntos.setPuntosActuales(puntos.getPuntosActuales() - request.getPuntosUsados());
+            puntosRepository.save(puntos);
+        }
+
+        pedido.setTotal(total);
 
         pedido = pedidoRepository.save(pedido);
+
+        if (request.getPuntosUsados() != null && request.getPuntosUsados() > 0) {
+            HistorialPuntos historial = new HistorialPuntos();
+            historial.setUsuario(usuario);
+            historial.setPuntos(request.getPuntosUsados());
+            historial.setTipo("RESTAR");
+            historial.setConcepto("Pago pedido " + pedido.getCodigoPedido());
+            historial.setReferenciaId(pedido.getId());
+            historialPuntosRepository.save(historial);
+        }
 
         Map<String, Object> wsData = new HashMap<>();
         wsData.put("tipo", "NUEVO_PEDIDO");

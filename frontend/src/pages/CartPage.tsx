@@ -3,16 +3,18 @@ import { useNavigate, Link } from "react-router-dom";
 import {
   Minus, Plus, ShoppingBag, ArrowLeft, Clock, Store, Truck,
   Smartphone, CreditCard, Banknote, QrCode, IceCream, Check,
-  X, Eye, EyeOff,
+  X, Eye, EyeOff, Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { crearPedido } from "../services/pedidos";
+import { obtenerMisPuntos, type MisPuntos } from "../services/puntos";
 import Footer from "../app/components/Footer";
 
 const SHIPPING_COST = 8;
+const PUNTO_VALOR = 0.05;
 
 function BackgroundDecorations() {
   return (
@@ -54,16 +56,32 @@ export default function CartPage() {
   const [cardForm, setCardForm] = useState({ titular: "", numero: "", vencimiento: "", cvv: "" });
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
   const [showCardCvv, setShowCardCvv] = useState(false);
+  const [misPuntos, setMisPuntos] = useState<MisPuntos | null>(null);
+  const [puntosUsar, setPuntosUsar] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      obtenerMisPuntos().then(setMisPuntos).catch(() => {});
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (paymentMethod !== "puntos") setPuntosUsar(0);
+  }, [paymentMethod]);
 
   const total = deliveryMethod === "delivery" ? subtotal + SHIPPING_COST : subtotal;
 
-  const metodoPagoId = paymentMethod === "yape" ? 1 : paymentMethod === "plin" ? 2 : paymentMethod === "card" ? 3 : 4;
+  const maxPuntos = misPuntos?.afiliado ? Math.min(misPuntos.puntosActuales, Math.ceil(total / PUNTO_VALOR)) : 0;
+  const descuentoPuntos = puntosUsar * PUNTO_VALOR;
+  const totalConPuntos = Math.max(0, total - descuentoPuntos);
+
+  const metodoPagoId = paymentMethod === "yape" ? 1 : paymentMethod === "plin" ? 2 : paymentMethod === "card" ? 3 : paymentMethod === "puntos" ? 5 : 4;
   const metodoEntregaId = deliveryMethod === "pickup" ? 1 : 2;
 
   const handleConfirmClick = () => {
     if (!user) { toast.error("Debes iniciar sesión para realizar un pedido"); navigate("/login"); return; }
     if (!paymentMethod) return;
-    if (paymentMethod === "cash") { handlePlaceOrder(); return; }
+    if (paymentMethod === "cash" || paymentMethod === "puntos") { handlePlaceOrder(); return; }
     setPaymentStep(paymentMethod as PaymentStep);
   };
 
@@ -86,6 +104,7 @@ export default function CartPage() {
         metodoPagoId,
         direccionEntrega: deliveryMethod === "delivery" ? deliveryAddress : undefined,
         numeroOperacion,
+        puntosUsados: paymentMethod === "puntos" ? puntosUsar : undefined,
         detalles: items.map((i) => ({ productoId: i.id || 0, nombre: i.name, imagenUrl: i.image, cantidad: i.quantity, precioUnitario: i.price })),
       });
       setOrderResult({ codigo: res.codigoPedido, total: res.total, id: res.id });
@@ -261,6 +280,7 @@ export default function CartPage() {
                         { id: "plin", icon: QrCode, label: "Plin" },
                         { id: "card", icon: CreditCard, label: "Tarjeta" },
                         { id: "cash", icon: Banknote, label: "Efectivo" },
+                        ...(user ? [{ id: "puntos" as const, icon: Star, label: "Puntos" }] : []),
                       ].map((method) => (
                         <label key={method.id} onClick={() => setPaymentMethod(method.id)} className={`flex flex-col items-center justify-center p-4 border rounded-2xl cursor-pointer transition-all ${paymentMethod === method.id ? "border-[#ff6b9d] bg-[#ffd9df] ring-2 ring-[#ff6b9d]/20" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
                           <method.icon className={`w-8 h-8 mb-2 ${paymentMethod === method.id ? "text-[#ff6b9d]" : "text-gray-400"}`} />
@@ -268,6 +288,54 @@ export default function CartPage() {
                         </label>
                       ))}
                     </div>
+                    {paymentMethod === "puntos" && (
+                      <div className="mt-4 bg-gradient-to-br from-[#fff5f7] to-[#fff] rounded-2xl p-5 border border-[#ffe5ed] space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-600">Puntos disponibles</span>
+                          <div className="text-right">
+                            <span className="text-lg font-black text-[#ff6b9d]">{misPuntos?.puntosActuales ?? 0} pts</span>
+                            {misPuntos != null && (
+                              <p className="text-[10px] text-gray-400 leading-tight">{misPuntos.puntosAcumulados} pts acumulados</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span>Valor: 1 pt = S/{(PUNTO_VALOR).toFixed(2)}</span>
+                          <span>Máx: {maxPuntos} pts</span>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 block mb-1">Puntos a usar</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="range"
+                              min={0}
+                              max={maxPuntos || 1}
+                              step={10}
+                              value={puntosUsar}
+                              onChange={(e) => setPuntosUsar(Number(e.target.value))}
+                              className="flex-1 accent-[#ff6b9d]"
+                            />
+                            <input
+                              type="number"
+                              min={0}
+                              max={maxPuntos}
+                              value={puntosUsar}
+                              onChange={(e) => setPuntosUsar(Math.min(Number(e.target.value) || 0, maxPuntos))}
+                              className="w-24 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-center font-bold focus:ring-2 focus:ring-[#ff6b9d] outline-none"
+                            />
+                          </div>
+                        </div>
+                        {puntosUsar > 0 && (
+                          <div className="bg-white rounded-xl p-4 space-y-1.5 border border-gray-100">
+                            <div className="flex justify-between text-sm"><span className="text-gray-500">Subtotal</span><span className="font-semibold">S/{subtotal.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-sm"><span className="text-gray-500">Delivery</span><span className="font-semibold">{deliveryMethod === "delivery" ? `S/${SHIPPING_COST.toFixed(2)}` : "S/0.00"}</span></div>
+                            <div className="flex justify-between text-sm"><span className="text-green-600">Descuento Puntos (-{puntosUsar} pts)</span><span className="font-semibold text-green-600">-S/{descuentoPuntos.toFixed(2)}</span></div>
+                            <div className="border-t border-gray-100 pt-1.5 flex justify-between"><span className="font-bold">Total a pagar</span><span className="font-bold text-[#ff6b9d]">S/{totalConPuntos.toFixed(2)}</span></div>
+                          </div>
+                        )}
+                        {!misPuntos?.afiliado && <p className="text-xs text-gray-400 text-center">Ve a "Mi Perfil" para afiliarte al programa de fidelización</p>}
+                      </div>
+                    )}
                   </motion.div>
                 </motion.div>
               </div>

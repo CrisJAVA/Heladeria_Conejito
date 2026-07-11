@@ -21,6 +21,11 @@ public class PedidoRequest {
     @NotEmpty(message = "Debe incluir al menos un producto")
     private List<DetalleRequest> detalles;
 
+    private Integer puntosUsados;
+
+    public Integer getPuntosUsados() { return puntosUsados; }
+    public void setPuntosUsados(Integer puntosUsados) { this.puntosUsados = puntosUsados; }
+
     public Long getMetodoEntregaId() { return metodoEntregaId; }
     public void setMetodoEntregaId(Long metodoEntregaId) { this.metodoEntregaId = metodoEntregaId; }
     public Long getMetodoPagoId() { return metodoPagoId; }

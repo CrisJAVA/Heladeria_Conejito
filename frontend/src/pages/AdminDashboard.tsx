@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
 } from "recharts";
 
 const COLORS = ["#ff6b9d", "#ffd93d", "#7cacd7", "#22c55e", "#a43756"];
@@ -181,16 +181,44 @@ export default function AdminDashboard() {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white p-8 rounded-[40px] shadow-md">
                 <h4 className="text-xl font-bold text-gray-800 mb-6">Estado de Pedidos</h4>
                 {pedidosEstado.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie data={pedidosEstado} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="cantidad" nameKey="estado" label={({ estado, cantidad }) => `${estado}: ${cantidad}`}>
-                        {pedidosEstado.map((_, idx) => (
-                          <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="flex items-center gap-8">
+                    <div className="relative shrink-0" style={{ width: 240, height: 240 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pedidosEstado}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={70}
+                            outerRadius={100}
+                            dataKey="cantidad"
+                            nameKey="estado"
+                          >
+                            {pedidosEstado.map((_, idx) => (
+                              <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value: number) => [`${value} pedidos`, "Cantidad"]} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="text-center">
+                          <p className="text-3xl font-black text-gray-800">{pedidosEstado.reduce((s, e) => s + e.cantidad, 0)}</p>
+                          <p className="text-sm text-gray-400 -mt-1">Total</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      {pedidosEstado.map((e, i) => (
+                        <div key={e.estado} className="flex items-center gap-3">
+                          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          <span className="flex-1 text-sm font-medium text-gray-700">{e.estado.replace(/_/g, " ")}</span>
+                          <span className="text-sm font-bold text-gray-900">{e.cantidad}</span>
+                          <span className="text-xs text-gray-400">({((e.cantidad / pedidosEstado.reduce((s, x) => s + x.cantidad, 0)) * 100).toFixed(0)}%)</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <div className="h-64 flex items-center justify-center text-gray-400">Sin pedidos</div>
                 )}
