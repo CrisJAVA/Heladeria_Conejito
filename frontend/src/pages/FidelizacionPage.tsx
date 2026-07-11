@@ -1,79 +1,56 @@
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, IceCream, Star, Gift, Trophy, Sparkles, Zap, Check } from "lucide-react";
 import Footer from "../app/components/Footer";
+import { listarNiveles, type NivelFidelizacionDTO } from "../services/niveles";
 
-const levels = [
-  {
-    name: "Bronce",
+// Estilos visuales por nombre de nivel. El backend solo administra puntos y
+// beneficios; el ícono/color de cada nivel se mantiene igual que el diseño original.
+const ESTILOS_NIVEL: Record<string, { icon: any; color: string; bgCard: string; borderColor: string; badgeColor: string }> = {
+  Bronce: {
     icon: Star,
-    minPoints: 0,
     color: "from-amber-600 to-amber-400",
     bgCard: "bg-gradient-to-br from-amber-50 to-amber-100",
     borderColor: "border-amber-300",
     badgeColor: "bg-amber-500",
-    benefits: [
-      "5% de descuento en tu compra",
-      "1 helado gratis al mes",
-      "Acceso a promociones exclusivas",
-      "Acumula 5 puntos por cada S/ 1",
-    ],
   },
-  {
-    name: "Plata",
+  Plata: {
     icon: Zap,
-    minPoints: 501,
     color: "from-slate-400 to-slate-300",
     bgCard: "bg-gradient-to-br from-slate-50 to-slate-100",
     borderColor: "border-slate-300",
     badgeColor: "bg-slate-400",
-    benefits: [
-      "10% de descuento en tu compra",
-      "2 helados gratis al mes",
-      "1 topping gratis por pedido",
-      "Prioridad en atención presencial",
-      "Acumula 10 puntos por cada S/ 1",
-    ],
   },
-  {
-    name: "Oro",
+  Oro: {
     icon: Trophy,
-    minPoints: 1501,
     color: "from-yellow-500 to-yellow-300",
     bgCard: "bg-gradient-to-br from-yellow-50 to-amber-50",
     borderColor: "border-yellow-400",
     badgeColor: "bg-yellow-500",
-    benefits: [
-      "15% de descuento en tu compra",
-      "3 helados gratis al mes",
-      "1 bebida gratis por pedido",
-      "Envío delivery gratuito",
-      "Invitación a lanzamientos de sabores",
-      "Acumula 15 puntos por cada S/ 1",
-    ],
   },
-  {
-    name: "Diamante",
+  Diamante: {
     icon: Sparkles,
-    minPoints: 3001,
     color: "from-cyan-500 to-blue-400",
     bgCard: "bg-gradient-to-br from-cyan-50 to-blue-50",
     borderColor: "border-cyan-400",
     badgeColor: "bg-cyan-500",
-    benefits: [
-      "20% de descuento en tu compra",
-      "5 helados gratis al mes",
-      "1 pizza personal gratis al mes",
-      "Envío delivery gratuito ilimitado",
-      "Evento VIP exclusivo anual",
-      "Sabor personalizado en tu cumpleaños",
-      "Acumula 20 puntos por cada S/ 1",
-    ],
   },
-];
+};
+
+const ESTILO_DEFAULT = ESTILOS_NIVEL.Bronce;
 
 export default function FidelizacionPage() {
   const navigate = useNavigate();
+  const [levels, setLevels] = useState<NivelFidelizacionDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    listarNiveles()
+      .then(setLevels)
+      .catch(() => setLevels([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#fffbf7] flex flex-col relative">
@@ -109,48 +86,56 @@ export default function FidelizacionPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {levels.map((level, i) => (
-            <motion.div
-              key={level.name}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ scale: 1.01 }}
-              className={`${level.bgCard} rounded-2xl border ${level.borderColor} shadow-sm overflow-hidden`}
-            >
-              <div className="flex flex-col md:flex-row">
-                {/* Level header */}
-                <div className={`md:w-56 p-6 ${level.bgCard} flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r ${level.borderColor}`}>
-                  <div className={`w-16 h-16 rounded-full ${level.color} flex items-center justify-center mb-3 shadow-lg`}>
-                    <level.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className={`px-4 py-1 ${level.badgeColor} text-white text-sm font-bold rounded-full mb-2`}>
-                    {level.minPoints === 0 ? "0 pts" : `${level.minPoints}+ pts`}
-                  </div>
-                  <h3 className={`text-2xl font-bold bg-gradient-to-r ${level.color} bg-clip-text text-transparent`}>
-                    {level.name}
-                  </h3>
-                </div>
-
-                {/* Benefits */}
-                <div className="flex-1 p-6">
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {level.benefits.map((benefit, j) => (
-                      <div key={j} className="flex items-start gap-3">
-                        <div className={`w-6 h-6 rounded-full ${level.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                          <Check className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <span className="text-sm text-gray-700">{benefit}</span>
+        {loading ? (
+          <div className="text-center text-gray-400 py-10">Cargando niveles...</div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {levels.map((level, i) => {
+              const estilo = ESTILOS_NIVEL[level.nombre] || ESTILO_DEFAULT;
+              const Icon = estilo.icon;
+              return (
+                <motion.div
+                  key={level.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ scale: 1.01 }}
+                  className={`${estilo.bgCard} rounded-2xl border ${estilo.borderColor} shadow-sm overflow-hidden`}
+                >
+                  <div className="flex flex-col md:flex-row">
+                    {/* Level header */}
+                    <div className={`md:w-56 p-6 ${estilo.bgCard} flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r ${estilo.borderColor}`}>
+                      <div className={`w-16 h-16 rounded-full ${estilo.color} flex items-center justify-center mb-3 shadow-lg`}>
+                        <Icon className="w-8 h-8 text-white" />
                       </div>
-                    ))}
+                      <div className={`px-4 py-1 ${estilo.badgeColor} text-white text-sm font-bold rounded-full mb-2`}>
+                        {level.puntosMinimos === 0 ? "0 pts" : `${level.puntosMinimos}+ pts`}
+                      </div>
+                      <h3 className={`text-2xl font-bold bg-gradient-to-r ${estilo.color} bg-clip-text text-transparent`}>
+                        {level.nombre}
+                      </h3>
+                    </div>
+
+                    {/* Benefits */}
+                    <div className="flex-1 p-6">
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {(level.beneficios || []).map((benefit) => (
+                          <div key={benefit.id} className="flex items-start gap-3">
+                            <div className={`w-6 h-6 rounded-full ${estilo.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                              <Check className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <span className="text-sm text-gray-700">{benefit.descripcion}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

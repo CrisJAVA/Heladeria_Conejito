@@ -7,6 +7,8 @@ public class PuntosDTO {
     private int puntosAcumulados;
     private String nivel;
     private String nivelColor;
+    private String nivelSiguiente;
+    private int puntosSiguiente;
     private boolean afiliado;
 
     public PuntosDTO() {}
@@ -21,6 +23,10 @@ public class PuntosDTO {
     public void setNivel(String nivel) { this.nivel = nivel; }
     public String getNivelColor() { return nivelColor; }
     public void setNivelColor(String nivelColor) { this.nivelColor = nivelColor; }
+    public String getNivelSiguiente() { return nivelSiguiente; }
+    public void setNivelSiguiente(String nivelSiguiente) { this.nivelSiguiente = nivelSiguiente; }
+    public int getPuntosSiguiente() { return puntosSiguiente; }
+    public void setPuntosSiguiente(int puntosSiguiente) { this.puntosSiguiente = puntosSiguiente; }
     public boolean isAfiliado() { return afiliado; }
     public void setAfiliado(boolean afiliado) { this.afiliado = afiliado; }
 }

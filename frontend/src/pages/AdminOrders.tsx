@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { listarPedidos, actualizarEstadoPedido, type PedidoResponse } from "../services/pedidos";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 const WS_URL = "ws://localhost:8080/ws/pedidos";
 
@@ -24,6 +25,7 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   const loadPedidos = async () => {
@@ -58,6 +60,13 @@ export default function AdminOrders() {
   useEffect(() => {
     loadPedidos();
     connectWS();
+    obtenerConfiguracion()
+      .then((data) => {
+        setConfig(data);
+      })
+      .catch(() => {
+        console.log("No se pudo cargar logo");
+      });
     return () => { wsRef.current?.close(); };
   }, [connectWS]);
 
@@ -75,7 +84,9 @@ export default function AdminOrders() {
     if (filter !== "Todos" && p.estado !== filter) return false;
     if (search) {
       const q = search.toLowerCase();
-      return p.codigoPedido.toLowerCase().includes(q) || p.usuarioNombre.toLowerCase().includes(q);
+      const codigo = p.codigoPedido?.toLowerCase() ?? "";
+      const cliente = p.usuarioNombre?.toLowerCase() ?? "";
+      return codigo.includes(q) || cliente.includes(q);
     }
     return true;
   });
@@ -102,8 +113,12 @@ export default function AdminOrders() {
 
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] bg-white flex flex-col py-6 px-4 z-50">
         <div className="mb-10 px-2 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm overflow-hidden">
+            {config?.logoUrl ? ( <img src={config.logoUrl} alt={config.nombreNegocio || "Logo"} className="w-full h-full object-cover" /> ) : (
+              <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }} >
+                icecream
+              </span>
+            )}
           </div>
           <div><h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1><p className="text-[11px] font-medium text-[#564245] uppercase tracking-wider">Heladería Ica</p></div>
         </div>

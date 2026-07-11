@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS historial_puntos (
     id SERIAL PRIMARY KEY,
     usuario_id INTEGER NOT NULL,
     puntos INTEGER NOT NULL,
-    tipo VARCHAR(10) CHECK (tipo IN ('SUMAR', 'CANJEAR')),
+    tipo VARCHAR(10) CHECK (tipo IN ('SUMAR', 'CANJEAR', 'RESTAR', 'DEVOLVER')),
     concepto VARCHAR(255),
     referencia_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

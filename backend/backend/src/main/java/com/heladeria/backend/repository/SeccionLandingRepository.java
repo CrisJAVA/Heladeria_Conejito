@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface SeccionLandingRepository extends JpaRepository<SeccionLanding, Long> {
+
     Optional<SeccionLanding> findBySectionKey(String sectionKey);
     boolean existsBySectionKey(String sectionKey);
 }

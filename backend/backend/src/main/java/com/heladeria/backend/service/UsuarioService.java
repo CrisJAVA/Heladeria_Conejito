@@ -3,6 +3,7 @@ package com.heladeria.backend.service;
 import com.heladeria.backend.dto.CambiarPasswordRequest;
 import com.heladeria.backend.dto.ClienteDTO;
 import com.heladeria.backend.dto.LoginRequest;
+import com.heladeria.backend.dto.UsuarioAdminDTO;
 import com.heladeria.backend.dto.PerfilDTO;
 import com.heladeria.backend.dto.RegisterRequest;
 import com.heladeria.backend.model.NivelFidelizacion;
@@ -121,7 +122,66 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    @Transactional(readOnly = true)
+    public List<UsuarioAdminDTO> listarUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
+        List<UsuarioAdminDTO> result = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            UsuarioAdminDTO dto = new UsuarioAdminDTO();
+            dto.setId(u.getId());
+            dto.setNombre(u.getNombre());
+            dto.setEmail(u.getEmail());
+            dto.setTelefono(u.getTelefono());
+            dto.setDireccion(u.getDireccion());
+            dto.setRol(u.getRol());
+            dto.setActivo(u.getActivo());
+            dto.setCreatedAt(u.getCreatedAt());
+
+            long totalPedidos = pedidoRepository.countByUsuarioId(u.getId());
+            dto.setTotalPedidos((int) totalPedidos);
+
+            java.math.BigDecimal totalGastado = pedidoRepository.sumTotalByUsuarioId(u.getId());
+            dto.setTotalGastado(totalGastado != null ? totalGastado : java.math.BigDecimal.ZERO);
+
+            List<LocalDateTime> fechas = pedidoRepository.findLastOrderDateByUsuarioId(u.getId());
+            dto.setUltimoPedido(fechas.isEmpty() ? null : fechas.get(0));
+
+            Puntos puntos = puntosRepository.findFirstByUsuarioId(u.getId()).orElse(null);
+            if (puntos != null) {
+                dto.setPuntosActuales(puntos.getPuntosActuales());
+                dto.setNivel(puntos.getNivel() != null ? puntos.getNivel().getNombre() : null);
+            } else {
+                dto.setPuntosActuales(0);
+                dto.setNivel(bronce != null ? bronce.getNombre() : "Bronce");
+            }
+
+            result.add(dto);
+        }
+        return result;
+    }
+
     @Transactional
+    public void cambiarEstadoUsuario(Long id, Boolean activo) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setActivo(activo);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void cambiarRolUsuario(Long id, String rol) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String rolUpper = rol.toUpperCase();
+        if (!List.of("CLIENTE", "ADMIN").contains(rolUpper)) {
+            throw new RuntimeException("Rol inválido. Use CLIENTE o ADMIN");
+        }
+        usuario.setRol(rolUpper);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional(readOnly = true)
     public List<ClienteDTO> listarClientes() {
         List<Usuario> usuarios = usuarioRepository.findByRolOrderByCreatedAtDesc("CLIENTE");
         NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IceCream, Mail, Lock, User, Phone, MapPin, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../app/components/Footer";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -19,6 +20,13 @@ export default function RegisterPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -74,8 +82,10 @@ export default function RegisterPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <IceCream className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
+              {config?.logoUrl ? (
+                <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />) : (
+                <IceCream className="w-8 h-8 text-white" />)}
             </div>
             <h1 className="text-2xl font-bold text-[#2d2d2d]">Crear Cuenta</h1>
             <p className="text-gray-500 text-sm mt-1">Regístrate y obtén beneficios exclusivos</p>

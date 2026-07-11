@@ -18,8 +18,9 @@ public class HistorialPuntos {
     @Column(nullable = false)
     private Integer puntos;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private String tipo;
+    private TipoTransaccion tipo;
 
     @Column(length = 255)
     private String concepto;
@@ -41,8 +42,8 @@ public class HistorialPuntos {
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     public Integer getPuntos() { return puntos; }
     public void setPuntos(Integer puntos) { this.puntos = puntos; }
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public TipoTransaccion getTipo() { return tipo; }
+    public void setTipo(TipoTransaccion tipo) { this.tipo = tipo; }
     public String getConcepto() { return concepto; }
     public void setConcepto(String concepto) { this.concepto = concepto; }
     public Long getReferenciaId() { return referenciaId; }

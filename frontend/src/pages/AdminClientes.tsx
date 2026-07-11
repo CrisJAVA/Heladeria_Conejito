@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { listarClientes, type ClienteInfo } from "../services/auth";
+import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
 const levelConfig: Record<string, {
   label: string; gradient: string; badgeBg: string; badgeText: string;
@@ -52,7 +53,7 @@ function getInitials(name: string): string {
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
-  const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"];
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
@@ -81,6 +82,7 @@ export default function AdminClientes() {
   const [clientes, setClientes] = useState<ClienteInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -94,6 +96,12 @@ export default function AdminClientes() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    obtenerConfiguracion()
+      .then(setConfig)
+      .catch(() => { });
+  }, []);
 
   const filtered = clientes.filter((c) => {
     if (!search) return true;
@@ -117,7 +125,11 @@ export default function AdminClientes() {
       <aside className="fixed left-0 top-0 h-screen w-64 border-r border-[#e1e3e4] bg-white flex flex-col py-6 px-4 z-50">
         <div className="flex items-center gap-3 px-2 mb-10">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d] flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>icecream</span>
+            {config?.logoUrl ? (
+              <img src={config.logoUrl} className="w-full h-full object-cover" />) : (
+              <span className="material-symbols-outlined">
+                icecream
+              </span>)}
           </div>
           <div>
             <h1 className="text-[24px] leading-[32px] font-bold text-[#191c1d]">Admin Panel</h1>
@@ -182,11 +194,10 @@ export default function AdminClientes() {
                 <button
                   key={nivel}
                   onClick={() => setSearch(nivel === "Todos" ? "" : nivel)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border ${
-                    (nivel === "Todos" && !search) || search === nivel
-                      ? "bg-[#ff7e9d] text-white border-[#ff7e9d] shadow-sm"
-                      : "bg-white text-[#564245] border-[#e1e3e4] hover:border-[#ff7e9d]"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border ${(nivel === "Todos" && !search) || search === nivel
+                    ? "bg-[#ff7e9d] text-white border-[#ff7e9d] shadow-sm"
+                    : "bg-white text-[#564245] border-[#e1e3e4] hover:border-[#ff7e9d]"
+                    }`}
                 >
                   {nivel}
                 </button>
@@ -199,7 +210,7 @@ export default function AdminClientes() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#564245]">search</span>
               <input className="w-full pl-12 pr-4 py-3 bg-[#f3f4f5] border-none focus:ring-2 focus:ring-[#ff7e9d] rounded-xl text-[14px] outline-none transition-all" placeholder="Buscar por nombre o email..." value={search} onChange={(e) => {
                 const val = e.target.value;
-                if (!["Diamante","Oro","Plata","Bronce","Todos"].includes(val)) setSearch(val);
+                if (!["Diamante", "Oro", "Plata", "Bronce", "Todos"].includes(val)) setSearch(val);
               }} />
             </div>
           </motion.div>

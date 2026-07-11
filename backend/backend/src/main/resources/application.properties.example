@@ -1,0 +1,33 @@
+# ============================================================
+# Heladería Conejito - Configuración de ejemplo
+# Copia este archivo como application.properties y ajusta los valores
+# ============================================================
+spring.application.name=backend
+
+# PostgreSQL
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/heladeria_conejito}
+spring.datasource.driverClassName=org.postgresql.Driver
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:tu_password}
+
+# JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.open-in-view=false
+
+# Servidor
+server.port=${PORT:8080}
+
+# JWT
+jwt.secret=${JWT_SECRET:CambiaEsteSecretPorUnoSeguroEnProduccion}
+jwt.expiration=${JWT_EXPIRATION:86400000}
+
+# File upload
+upload.dir=${UPLOAD_DIR:uploads}
+spring.web.resources.static-locations=file:${UPLOAD_DIR:uploads}/,classpath:/static/
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Logging
+logging.level.com.heladeria=${LOG_LEVEL:INFO}
