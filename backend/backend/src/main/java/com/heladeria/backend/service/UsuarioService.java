@@ -57,7 +57,7 @@ public class UsuarioService {
         usuario.setActivo(true);
         usuario = usuarioRepository.save(usuario);
 
-        NivelFidelizacion bronce = nivelFidelizacionRepository.findByNombre("Bronce").orElse(null);
+        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
         Puntos puntos = new Puntos();
         puntos.setUsuario(usuario);
         puntos.setPuntosActuales(0);
@@ -124,7 +124,7 @@ public class UsuarioService {
     @Transactional
     public List<ClienteDTO> listarClientes() {
         List<Usuario> usuarios = usuarioRepository.findByRolOrderByCreatedAtDesc("CLIENTE");
-        NivelFidelizacion bronce = nivelFidelizacionRepository.findByNombre("Bronce").orElse(null);
+        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
         List<ClienteDTO> result = new ArrayList<>();
         for (Usuario u : usuarios) {
             ClienteDTO dto = new ClienteDTO();
@@ -145,7 +145,7 @@ public class UsuarioService {
             List<LocalDateTime> fechas = pedidoRepository.findLastOrderDateByUsuarioId(u.getId());
             dto.setUltimoPedido(fechas.isEmpty() ? null : fechas.get(0));
 
-            Puntos puntos = puntosRepository.findByUsuarioId(u.getId()).orElse(null);
+            Puntos puntos = puntosRepository.findFirstByUsuarioId(u.getId()).orElse(null);
             if (puntos == null) {
                 puntos = new Puntos();
                 puntos.setUsuario(u);

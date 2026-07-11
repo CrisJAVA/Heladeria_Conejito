@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface PuntosRepository extends JpaRepository<Puntos, Long> {
-    Optional<Puntos> findByUsuarioId(Long usuarioId);
+    Optional<Puntos> findFirstByUsuarioId(Long usuarioId);
 }

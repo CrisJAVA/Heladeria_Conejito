@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findByActivoTrue();
-    java.util.Optional<Categoria> findByNombre(String nombre);
+    java.util.Optional<Categoria> findFirstByNombre(String nombre);
+    boolean existsByNombre(String nombre);
 }

@@ -182,7 +182,7 @@ public class PedidoService {
 
     private void sumarPuntosPorPedido(Pedido pedido) {
         Long usuarioId = pedido.getUsuario().getId();
-        Puntos puntos = puntosRepository.findByUsuarioId(usuarioId).orElse(null);
+        Puntos puntos = puntosRepository.findFirstByUsuarioId(usuarioId).orElse(null);
         if (puntos == null) return;
 
         NivelFidelizacion nivel = puntos.getNivel();
