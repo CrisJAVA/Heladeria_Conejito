@@ -107,7 +107,7 @@ public class PedidoService {
         BigDecimal total = subtotal.add(entrega.getCosto());
 
         if (request.getPuntosUsados() != null && request.getPuntosUsados() > 0) {
-            Puntos puntos = puntosRepository.findByUsuarioId(usuarioId)
+            Puntos puntos = puntosRepository.findFirstByUsuarioId(usuarioId)
                     .orElseThrow(() -> new RuntimeException("No estás afiliado al programa de fidelización"));
 
             if (puntos.getPuntosActuales() < request.getPuntosUsados()) {
