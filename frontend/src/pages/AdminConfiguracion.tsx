@@ -4,6 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { obtenerConfiguracion, actualizarConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 import { subirImagen } from "../services/upload";
+import {
+  obtenerConfiguracionMetodoPago,
+  actualizarConfiguracionMetodoPago,
+  subirImagenMetodoPago,
+  type ConfiguracionMetodoPagoDTO,
+} from "../services/configuracionMetodoPago";
 
 const CONFIG_DEFAULT: ConfiguracionDTO = {
   nombreNegocio: "Heladería Ica",
@@ -29,6 +35,19 @@ export default function AdminConfiguracion() {
   const [guardando, setGuardando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [logo, setLogo] = useState<string>("");
+
+  const [modalAbierto, setModalAbierto] = useState<"YAPE" | "PLIN" | null>(null);
+  const [configMetodo, setConfigMetodo] = useState<ConfiguracionMetodoPagoDTO>({
+    tipo: "YAPE",
+    nombreTitular: "",
+    numeroCelular: "",
+    usuarioVisible: "",
+    imagenUrl: "",
+    mensaje: "",
+    activo: false,
+  });
+  const [guardandoMetodo, setGuardandoMetodo] = useState(false);
+  const [subiendoQr, setSubiendoQr] = useState(false);
 
   useEffect(() => {
     obtenerConfiguracion()
@@ -386,18 +405,46 @@ export default function AdminConfiguracion() {
                       : [...seleccionados, method];
                     setConfig((prev) => ({ ...prev, metodosPago: nuevos.join(",") }));
                   };
+                  const isDigital = method === "Yape" || method === "Plin";
                   return (
-                    <label key={method} className="group cursor-pointer">
-                      <div className="flex items-center gap-3 p-4 border border-[#dcc0c4] rounded-2xl group-hover:border-[#ff7e9d] group-hover:bg-[#ff7e9d]/5 transition-all">
+                    <div key={method} className="group">
+                      <div className="flex items-center gap-2 p-4 border border-[#dcc0c4] rounded-2xl group-hover:border-[#ff7e9d] group-hover:bg-[#ff7e9d]/5 transition-all">
                         <input
                           checked={checked}
                           onChange={toggle}
                           className="w-5 h-5 rounded border-[#dcc0c4] text-[#ff7e9d] focus:ring-[#ff7e9d] transition-all"
                           type="checkbox"
                         />
-                        <span className="text-sm font-medium">{method}</span>
+                        <span className="text-sm font-medium flex-1">{method}</span>
+                        {isDigital && (
+                          <button
+                            type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const tipo = method.toUpperCase() as "YAPE" | "PLIN";
+                              setModalAbierto(tipo);
+                              try {
+                                const cfg = await obtenerConfiguracionMetodoPago(tipo);
+                                setConfigMetodo(cfg);
+                              } catch {
+                                setConfigMetodo({
+                                  tipo,
+                                  nombreTitular: "",
+                                  numeroCelular: "",
+                                  usuarioVisible: "",
+                                  imagenUrl: "",
+                                  mensaje: "",
+                                  activo: false,
+                                });
+                              }
+                            }}
+                            className="px-2 py-1 text-[11px] font-bold text-[#a43756] hover:bg-[#ff7e9d]/10 rounded-lg transition-all"
+                          >
+                            ⚙️
+                          </button>
+                        )}
                       </div>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -440,6 +487,184 @@ export default function AdminConfiguracion() {
           </div>
         </div>
       </main>
+
+      {modalAbierto && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setModalAbierto(null)}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-lg mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[24px] leading-[32px] font-bold">Configurar {modalAbierto}</h3>
+              <button onClick={() => setModalAbierto(null)} className="text-[#564245] hover:text-[#ba1a1a] transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-xl">
+                <span className="text-sm font-medium">Activo</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={configMetodo.activo}
+                    onChange={() => setConfigMetodo((prev) => ({ ...prev, activo: !prev.activo }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ff7e9d]" />
+                </label>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] leading-[16px] text-[#564245]">Nombre del titular *</label>
+                <input
+                  className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
+                  type="text"
+                  placeholder="Ej: Heladería Conejito"
+                  value={configMetodo.nombreTitular || ""}
+                  onChange={(e) => setConfigMetodo((prev) => ({ ...prev, nombreTitular: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] leading-[16px] text-[#564245]">Número de celular *</label>
+                <input
+                  className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
+                  type="text"
+                  placeholder="Ej: 999999999"
+                  value={configMetodo.numeroCelular || ""}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 9);
+                    setConfigMetodo((prev) => ({ ...prev, numeroCelular: val }));
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] leading-[16px] text-[#564245]">Usuario visible</label>
+                <input
+                  className="w-full h-11 px-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[14px]"
+                  type="text"
+                  placeholder="Ej: Heladería Conejito"
+                  value={configMetodo.usuarioVisible || ""}
+                  onChange={(e) => setConfigMetodo((prev) => ({ ...prev, usuarioVisible: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] leading-[16px] text-[#564245]">Mensaje para el cliente</label>
+                <textarea
+                  className="w-full p-4 rounded-xl border border-[#dcc0c4] bg-[#f8f9fa] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none resize-none text-[14px]"
+                  rows={3}
+                  placeholder="Ej: Realiza el pago y adjunta tu comprobante"
+                  value={configMetodo.mensaje || ""}
+                  onChange={(e) => setConfigMetodo((prev) => ({ ...prev, mensaje: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12px] leading-[16px] text-[#564245]">Imagen QR</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center">
+                    {configMetodo.imagenUrl ? (
+                      <img src={configMetodo.imagenUrl} alt="QR" className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-[10px] text-gray-400 text-center px-2">Sin QR</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      id="qr-file-input"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error("La imagen no debe superar los 5MB");
+                          return;
+                        }
+                        setSubiendoQr(true);
+                        try {
+                          const { url } = await subirImagen(file);
+                          const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+                          const apiPrefix = baseUrl.replace(/\/api\/?$/, "");
+                          const fullUrl = url.startsWith("http") ? url : `${apiPrefix}${url}`;
+                          const actualizado = await subirImagenMetodoPago(modalAbierto, fullUrl);
+                          setConfigMetodo(actualizado);
+                          toast.success("QR subido correctamente");
+                        } catch {
+                          toast.error("Error al subir el QR");
+                        } finally {
+                          setSubiendoQr(false);
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={subiendoQr}
+                      onClick={() => document.getElementById("qr-file-input")?.click()}
+                      className="px-4 py-2 rounded-xl border border-[#897175] text-[#a43756] font-bold hover:bg-[#edeeef] transition-all text-xs disabled:opacity-50"
+                    >
+                      {subiendoQr ? "Subiendo..." : configMetodo.imagenUrl ? "Cambiar QR" : "Subir QR"}
+                    </button>
+                    {configMetodo.imagenUrl && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setConfigMetodo((prev) => ({ ...prev, imagenUrl: "" }));
+                          try {
+                            await subirImagenMetodoPago(modalAbierto, "");
+                          } catch {}
+                        }}
+                        className="px-4 py-2 rounded-xl border border-red-200 text-red-500 font-bold hover:bg-red-50 transition-all text-xs"
+                      >
+                        Quitar QR
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!configMetodo.nombreTitular?.trim()) {
+                      toast.error("El nombre del titular es obligatorio");
+                      return;
+                    }
+                    if (!configMetodo.numeroCelular?.trim() || configMetodo.numeroCelular.length < 9) {
+                      toast.error("El número debe tener 9 dígitos");
+                      return;
+                    }
+                    setGuardandoMetodo(true);
+                    try {
+                      const actualizado = await actualizarConfiguracionMetodoPago(modalAbierto, configMetodo);
+                      setConfigMetodo(actualizado);
+                      toast.success("Configuración guardada correctamente");
+                    } catch {
+                      toast.error("Error al guardar la configuración");
+                    } finally {
+                      setGuardandoMetodo(false);
+                    }
+                  }}
+                  disabled={guardandoMetodo}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#ff7e9d] text-[#761235] px-6 py-3 rounded-2xl font-bold hover:brightness-105 active:scale-95 transition-all disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
+                  {guardandoMetodo ? "Guardando..." : "Guardar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalAbierto(null)}
+                  className="flex-1 px-6 py-3 rounded-2xl border border-[#dcc0c4] text-[#564245] font-bold hover:bg-[#f3f4f5] transition-all"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] overflow-hidden">
         <div className="absolute top-[10%] left-[20%] w-64 h-64 bg-[#ff7e9d]/5 blur-[120px] rounded-full" />

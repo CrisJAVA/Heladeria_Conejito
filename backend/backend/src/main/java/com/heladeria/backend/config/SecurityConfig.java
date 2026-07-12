@@ -69,6 +69,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/landing-secciones/**").hasRole("ADMIN")
                         .requestMatchers("/api/reportes/**").hasRole("ADMIN")
                         .requestMatchers("/api/upload/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/configuracion-metodos-pago/activos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/configuracion-metodos-pago/**").hasRole("ADMIN")
+                        .requestMatchers("/api/configuracion-metodos-pago/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

@@ -28,6 +28,8 @@ export default function AdminOrders() {
   const [search, setSearch] = useState("");
   const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const mountedRef = useRef(true);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const loadPedidos = async () => {
     try {
@@ -53,12 +55,17 @@ export default function AdminOrders() {
           }
         } catch { /* ignore */ }
       };
-      ws.onclose = () => { setTimeout(connectWS, 3000); };
+      ws.onclose = () => {
+        if (mountedRef.current) {
+          reconnectTimeoutRef.current = setTimeout(connectWS, 3000);
+        }
+      };
       wsRef.current = ws;
     } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     loadPedidos();
     connectWS();
     obtenerConfiguracion()
@@ -68,7 +75,11 @@ export default function AdminOrders() {
       .catch(() => {
         console.log("No se pudo cargar logo");
       });
-    return () => { wsRef.current?.close(); };
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(reconnectTimeoutRef.current);
+      wsRef.current?.close();
+    };
   }, [connectWS]);
 
   const handleEstado = async (id: number, estado: string) => {

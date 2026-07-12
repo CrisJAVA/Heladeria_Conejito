@@ -8,47 +8,50 @@
 
  :: Spring Boot ::                (v4.0.6)
 
-2026-07-09T18:55:41.200-05:00  INFO 7068 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : Starting BackendApplication using Java 21.0.8 with PID 7068 (C:\Users\USUARIO\Downloads\Heladeria_Conejito-main\Heladeria_Conejito-main\backend\backend\target\classes started by USUARIO in C:\Users\USUARIO\Downloads\Heladeria_Conejito-main\Heladeria_Conejito-main\backend\backend)
-2026-07-09T18:55:41.202-05:00  INFO 7068 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : No active profile set, falling back to 1 default profile: "default"
-2026-07-09T18:55:41.243-05:00  INFO 7068 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-07-09T18:55:41.243-05:00  INFO 7068 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-07-09T18:55:41.757-05:00  INFO 7068 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-07-09T18:55:41.832-05:00  INFO 7068 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 68 ms. Found 16 JPA repository interfaces.
-2026-07-09T18:55:42.234-05:00  INFO 7068 --- [backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
-2026-07-09T18:55:42.244-05:00  INFO 7068 --- [backend] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-07-09T18:55:42.245-05:00  INFO 7068 --- [backend] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.21]
-2026-07-09T18:55:42.276-05:00  INFO 7068 --- [backend] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1033 ms
-2026-07-09T18:55:42.404-05:00  INFO 7068 --- [backend] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
-2026-07-09T18:55:42.437-05:00  INFO 7068 --- [backend] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
-2026-07-09T18:55:42.786-05:00  INFO 7068 --- [backend] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-07-09T18:55:42.811-05:00  INFO 7068 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-07-09T18:55:42.951-05:00  INFO 7068 --- [backend] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@21204513
-2026-07-09T18:55:42.952-05:00  INFO 7068 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-07-09T18:55:42.978-05:00  WARN 7068 --- [backend] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-07-09T18:55:42.997-05:00  INFO 7068 --- [backend] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [jdbc:postgresql://localhost:5432/heladeria_conejito]
-	Database driver: PostgreSQL JDBC Driver
-	Database dialect: PostgreSQLDialect
-	Database version: 18.4
-	Default catalog/schema: heladeria_conejito/public
+2026-07-12T13:49:32.481-05:00  INFO 10760 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : Starting BackendApplication using Java 21.0.11 with PID 10760 (C:\Users\crist\OneDrive\Documentos\Diseño de productos\Heladeria_Conejito\backend\backend\target\classes started by crist in C:\Users\crist\OneDrive\Documentos\Diseño de productos\Heladeria_Conejito\backend\backend)
+2026-07-12T13:49:32.486-05:00  INFO 10760 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-07-12T13:49:32.555-05:00  INFO 10760 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-07-12T13:49:32.555-05:00  INFO 10760 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-07-12T13:49:33.425-05:00  INFO 10760 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-12T13:49:33.534-05:00  INFO 10760 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 100 ms. Found 18 JPA repository interfaces.
+2026-07-12T13:49:34.193-05:00  INFO 10760 --- [backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-07-12T13:49:34.211-05:00  INFO 10760 --- [backend] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-12T13:49:34.211-05:00  INFO 10760 --- [backend] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.21]
+2026-07-12T13:49:34.254-05:00  INFO 10760 --- [backend] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1697 ms
+2026-07-12T13:49:34.443-05:00  INFO 10760 --- [backend] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-12T13:49:34.490-05:00  INFO 10760 --- [backend] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-07-12T13:49:34.920-05:00  INFO 10760 --- [backend] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-12T13:49:34.948-05:00  INFO 10760 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-12T13:49:35.147-05:00  INFO 10760 --- [backend] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:heladeria user=SA
+2026-07-12T13:49:35.150-05:00  INFO 10760 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-12T13:49:35.173-05:00  WARN 10760 --- [backend] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-12T13:49:35.195-05:00  INFO 10760 --- [backend] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:heladeria]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: HELADERIA/PUBLIC
 	Autocommit mode: undefined/unknown
 	Isolation level: READ_COMMITTED [default READ_COMMITTED]
-	JDBC fetch size: none
+	JDBC fetch size: 100
 	Pool: DataSourceConnectionProvider
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2026-07-09T18:55:43.936-05:00  INFO 7068 --- [backend] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-07-09T18:55:44.011-05:00  INFO 7068 --- [backend] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-07-09T18:55:44.066-05:00  INFO 7068 --- [backend] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-07-09T18:55:44.960-05:00  WARN 7068 --- [backend] [  restartedMain] .s.a.UserDetailsServiceAutoConfiguration : 
+2026-07-12T13:49:36.576-05:00  INFO 10760 --- [backend] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-12T13:49:36.673-05:00  INFO 10760 --- [backend] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-12T13:49:36.747-05:00  INFO 10760 --- [backend] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-12T13:49:38.028-05:00  WARN 10760 --- [backend] [  restartedMain] .s.a.UserDetailsServiceAutoConfiguration : 
 
-Using generated security password: 780e0012-849f-407f-8f28-be4bd6b410e6
+Using generated security password: 4dab1a51-a71e-41a2-bff0-abb52934f17a
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
-2026-07-09T18:55:44.966-05:00  INFO 7068 --- [backend] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2026-07-09T18:55:45.311-05:00  INFO 7068 --- [backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
-2026-07-09T18:55:45.316-05:00  INFO 7068 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : Started BackendApplication in 4.414 seconds (process running for 4.777)
-2026-07-09T18:55:49.226-05:00  INFO 7068 --- [backend] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-07-09T18:55:49.226-05:00  INFO 7068 --- [backend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-07-09T18:55:49.227-05:00  INFO 7068 --- [backend] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-12T13:49:38.035-05:00  INFO 10760 --- [backend] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-07-12T13:49:38.527-05:00  INFO 10760 --- [backend] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-07-12T13:49:38.533-05:00  INFO 10760 --- [backend] [  restartedMain] c.heladeria.backend.BackendApplication   : Started BackendApplication in 6.465 seconds (process running for 6.935)
+2026-07-12T13:51:56.016-05:00  INFO 10760 --- [backend] [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-12T13:51:56.017-05:00  INFO 10760 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-12T13:51:56.018-05:00  INFO 10760 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-12T13:51:56.307-05:00  WARN 10760 --- [backend] [nio-8080-exec-1] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.method.annotation.MethodArgumentTypeMismatchException: Method parameter 'id': Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "abc"]
+2026-07-12T13:52:28.730-05:00  WARN 10760 --- [backend] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [java.lang.RuntimeException: Correo o contraseña incorrectos]
+2026-07-12T13:52:53.292-05:00  WARN 10760 --- [backend] [nio-8080-exec-1] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.method.annotation.MethodArgumentTypeMismatchException: Method parameter 'id': Failed to convert value of type 'java.lang.String' to required type 'java.lang.Long'; For input string: "abc"]

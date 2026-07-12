@@ -13,6 +13,7 @@ import { crearPedido } from "../services/pedidos";
 import { obtenerMisPuntos, type MisPuntos } from "../services/puntos";
 import { listarMetodosEntrega, listarMetodosPago, type MetodoEntregaDTO, type MetodoPagoDTO } from "../services/metodos";
 import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
+import { listarMetodosPagoActivos, type ConfiguracionMetodoPagoDTO } from "../services/configuracionMetodoPago";
 import Footer from "../app/components/Footer";
 
 const SHIPPING_COST = 8;
@@ -63,11 +64,19 @@ export default function CartPage() {
   const [metodosEntrega, setMetodosEntrega] = useState<MetodoEntregaDTO[]>([]);
   const [metodosPagoDb, setMetodosPagoDb] = useState<MetodoPagoDTO[]>([]);
   const [config, setConfig] = useState<ConfiguracionDTO | null>(null);
+  const [configYape, setConfigYape] = useState<ConfiguracionMetodoPagoDTO | null>(null);
+  const [configPlin, setConfigPlin] = useState<ConfiguracionMetodoPagoDTO | null>(null);
 
   useEffect(() => {
     listarMetodosEntrega().then(setMetodosEntrega).catch(() => {});
     listarMetodosPago().then(setMetodosPagoDb).catch(() => {});
     obtenerConfiguracion().then(setConfig).catch(() => {});
+    listarMetodosPagoActivos().then((metodos) => {
+      metodos.forEach((m) => {
+        if (m.tipo === "YAPE") setConfigYape(m);
+        if (m.tipo === "PLIN") setConfigPlin(m);
+      });
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -401,15 +410,27 @@ export default function CartPage() {
                   <p className="text-gray-500 text-sm mt-1">Escanea el código QR y realiza el pago</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 border-2 border-dashed border-gray-200 mb-6">
-                  <div className="w-48 h-48 bg-gradient-to-br from-[#6b3fa0] to-[#8b5cf6] rounded-2xl mx-auto flex items-center justify-center shadow-inner">
-                    <QrCode className="w-32 h-32 text-white opacity-70" />
-                  </div>
+                  {configYape?.imagenUrl ? (
+                    <div className="w-48 h-48 mx-auto flex items-center justify-center">
+                      <img src={configYape.imagenUrl} alt="QR Yape" className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-48 h-48 bg-gradient-to-br from-[#6b3fa0] to-[#8b5cf6] rounded-2xl mx-auto flex items-center justify-center shadow-inner">
+                      <QrCode className="w-32 h-32 text-white opacity-70" />
+                    </div>
+                  )}
                 </div>
                 <div className="bg-[#f8f5ff] rounded-2xl p-4 mb-6 space-y-2">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Titular</span><span className="font-semibold text-[#2d2d2d]">Heladería Conejito</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Celular</span><span className="font-semibold text-[#2d2d2d]">999 999 999</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Titular</span><span className="font-semibold text-[#2d2d2d]">{configYape?.nombreTitular || "Heladería Conejito"}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Celular</span><span className="font-semibold text-[#2d2d2d]">{configYape?.numeroCelular ? configYape.numeroCelular.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3") : "999 999 999"}</span></div>
+                  {configYape?.usuarioVisible && (
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Usuario</span><span className="font-semibold text-[#2d2d2d]">{configYape.usuarioVisible}</span></div>
+                  )}
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Total a pagar</span><span className="font-bold text-[#ff6b9d]">S/.{total.toFixed(2)}</span></div>
                 </div>
+                {configYape?.mensaje && (
+                  <div className="bg-[#fff8e1] rounded-2xl p-3 mb-4 text-sm text-[#8d6e00] text-center border border-[#ffd700]/30">{configYape.mensaje}</div>
+                )}
                 <div className="space-y-1.5 mb-6">
                   <label className="text-sm font-medium text-gray-700">Número de operación *</label>
                   <input type="text" placeholder="Ingresa el número de operación de Yape" value={yapeOp} onChange={(e) => setYapeOp(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#ff6b9d] outline-none transition-all" />
@@ -430,15 +451,27 @@ export default function CartPage() {
                   <p className="text-gray-500 text-sm mt-1">Escanea el código QR y realiza el pago</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 border-2 border-dashed border-gray-200 mb-6">
-                  <div className="w-48 h-48 bg-gradient-to-br from-[#00b8a9] to-[#00d4c0] rounded-2xl mx-auto flex items-center justify-center shadow-inner">
-                    <QrCode className="w-32 h-32 text-white opacity-70" />
-                  </div>
+                  {configPlin?.imagenUrl ? (
+                    <div className="w-48 h-48 mx-auto flex items-center justify-center">
+                      <img src={configPlin.imagenUrl} alt="QR Plin" className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-48 h-48 bg-gradient-to-br from-[#00b8a9] to-[#00d4c0] rounded-2xl mx-auto flex items-center justify-center shadow-inner">
+                      <QrCode className="w-32 h-32 text-white opacity-70" />
+                    </div>
+                  )}
                 </div>
                 <div className="bg-[#f0fffd] rounded-2xl p-4 mb-6 space-y-2">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Titular</span><span className="font-semibold text-[#2d2d2d]">Heladería Conejito</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Número</span><span className="font-semibold text-[#2d2d2d]">999 888 777</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Titular</span><span className="font-semibold text-[#2d2d2d]">{configPlin?.nombreTitular || "Heladería Conejito"}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Número</span><span className="font-semibold text-[#2d2d2d]">{configPlin?.numeroCelular ? configPlin.numeroCelular.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3") : "999 888 777"}</span></div>
+                  {configPlin?.usuarioVisible && (
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Usuario</span><span className="font-semibold text-[#2d2d2d]">{configPlin.usuarioVisible}</span></div>
+                  )}
                   <div className="flex justify-between text-sm"><span className="text-gray-500">Total a pagar</span><span className="font-bold text-[#ff6b9d]">S/.{total.toFixed(2)}</span></div>
                 </div>
+                {configPlin?.mensaje && (
+                  <div className="bg-[#fff8e1] rounded-2xl p-3 mb-4 text-sm text-[#8d6e00] text-center border border-[#ffd700]/30">{configPlin.mensaje}</div>
+                )}
                 <div className="space-y-1.5 mb-6">
                   <label className="text-sm font-medium text-gray-700">Número de operación *</label>
                   <input type="text" placeholder="Ingresa el número de operación de Plin" value={plinOp} onChange={(e) => setPlinOp(e.target.value)} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#ff6b9d] outline-none transition-all" />

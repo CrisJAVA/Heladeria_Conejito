@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { IceCream, Menu, X, ShoppingBag, User, Package, Settings, LogOut, Heart, Bell, Gift, Star, Trophy } from "lucide-react";
+import { IceCream, Menu, X, ShoppingBag, User, Package, Settings, LogOut, Heart, Bell, Gift, Star, Trophy, LayoutDashboard } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -179,6 +179,15 @@ export default function Navbar() {
                           </span>
                         )}
                       </button>
+                      {user.rol === "ADMIN" && (
+                        <button
+                          onClick={() => { navigate("/admin"); setShowDropdown(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#ff6b9d] transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          Dashboard de administración
+                        </button>
+                      )}
                       <button
                         onClick={() => { navigate("/editar-perfil"); setShowDropdown(false); }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#ff6b9d] transition-colors"
@@ -311,6 +320,15 @@ export default function Navbar() {
                       <span className="ml-auto px-2 py-0.5 rounded-full bg-[#ff6b9d]/10 text-[10px] font-bold text-[#ff6b9d]">{puntos.nivel || "Bronce"}</span>
                     )}
                   </button>
+                  {user.rol === "ADMIN" && (
+                    <button
+                      onClick={() => { navigate("/admin"); setIsOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2 text-gray-600 hover:text-[#ff6b9d] transition-colors text-sm"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard de administración
+                    </button>
+                  )}
                   <button
                     onClick={() => { navigate("/editar-perfil"); setIsOpen(false); }}
                     className="flex items-center gap-3 px-4 py-2 text-gray-600 hover:text-[#ff6b9d] transition-colors text-sm"

@@ -215,6 +215,20 @@ CREATE TABLE IF NOT EXISTS carrito (
     UNIQUE (usuario_id, producto_id)
 );
 
+-- CONFIGURACIÓN DE MÉTODOS DE PAGO DIGITALES (Yape / Plin)
+CREATE TABLE IF NOT EXISTS configuracion_metodo_pago (
+    id SERIAL PRIMARY KEY,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('YAPE', 'PLIN')),
+    nombre_titular VARCHAR(200),
+    numero_celular VARCHAR(20),
+    usuario_visible VARCHAR(200),
+    imagen_url VARCHAR(500),
+    mensaje VARCHAR(500),
+    activo BOOLEAN DEFAULT FALSE,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (tipo)
+);
+
 -- ============================================================
 -- DATOS INICIALES
 -- ============================================================

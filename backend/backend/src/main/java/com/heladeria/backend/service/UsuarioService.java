@@ -207,19 +207,17 @@ public class UsuarioService {
 
             Puntos puntos = puntosRepository.findFirstByUsuarioId(u.getId()).orElse(null);
             if (puntos == null) {
-                puntos = new Puntos();
-                puntos.setUsuario(u);
-                puntos.setPuntosActuales(0);
-                puntos.setPuntosAcumulados(0);
-                puntos.setNivel(bronce);
-                puntosRepository.save(puntos);
-            }
-
-            dto.setPuntosActuales(puntos.getPuntosActuales());
-            dto.setPuntosAcumulados(puntos.getPuntosAcumulados());
-            if (puntos.getNivel() != null) {
-                dto.setNivel(puntos.getNivel().getNombre());
-                dto.setNivelColor(puntos.getNivel().getColorHex());
+                dto.setPuntosActuales(0);
+                dto.setPuntosAcumulados(0);
+                dto.setNivel(bronce != null ? bronce.getNombre() : "Bronce");
+                dto.setNivelColor(bronce != null ? bronce.getColorHex() : null);
+            } else {
+                dto.setPuntosActuales(puntos.getPuntosActuales());
+                dto.setPuntosAcumulados(puntos.getPuntosAcumulados());
+                if (puntos.getNivel() != null) {
+                    dto.setNivel(puntos.getNivel().getNombre());
+                    dto.setNivelColor(puntos.getNivel().getColorHex());
+                }
             }
 
             result.add(dto);

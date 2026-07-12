@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -124,6 +124,9 @@ export default function ProductModal({ open, onOpenChange, onSuccess, product }:
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[24px] font-bold text-[#191c1d]">{isEditing ? "Editar Producto" : "Nuevo Producto"}</DialogTitle>
+          <DialogDescription>
+            {isEditing ? `Editando producto: ${product?.nombre}` : "Completa los datos para crear un nuevo producto"}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-2">
           {errors._general && (
