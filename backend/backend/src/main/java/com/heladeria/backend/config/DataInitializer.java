@@ -19,6 +19,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
     private final NivelFidelizacionRepository nivelFidelizacionRepository;
+    private final BeneficioRepository beneficioRepository;
     private final PromocionRepository promocionRepository;
     private final SeccionLandingRepository seccionLandingRepository;
     private final PuntosRepository puntosRepository;
@@ -29,8 +30,9 @@ public class DataInitializer implements CommandLineRunner {
                            MetodoPagoRepository metodoPagoRepository,
                            CategoriaRepository categoriaRepository,
                            ProductoRepository productoRepository,
-                           NivelFidelizacionRepository nivelFidelizacionRepository,
-                           PromocionRepository promocionRepository,
+                            NivelFidelizacionRepository nivelFidelizacionRepository,
+                            BeneficioRepository beneficioRepository,
+                            PromocionRepository promocionRepository,
                            SeccionLandingRepository seccionLandingRepository,
                            PuntosRepository puntosRepository,
                            PasswordEncoder passwordEncoder) {
@@ -40,6 +42,7 @@ public class DataInitializer implements CommandLineRunner {
         this.categoriaRepository = categoriaRepository;
         this.productoRepository = productoRepository;
         this.nivelFidelizacionRepository = nivelFidelizacionRepository;
+        this.beneficioRepository = beneficioRepository;
         this.promocionRepository = promocionRepository;
         this.seccionLandingRepository = seccionLandingRepository;
         this.puntosRepository = puntosRepository;
@@ -52,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
         inicializarUsuariosBase();
         inicializarNiveles();
         inicializarFakeClientes();
+        inicializarBeneficios();
         inicializarMetodosEntrega();
         inicializarMetodosPago();
         inicializarCategorias();
@@ -102,6 +106,47 @@ public class DataInitializer implements CommandLineRunner {
                 nivelFidelizacionRepository.save(nivel);
             }
         }
+    }
+
+    private void inicializarBeneficios() {
+        if (beneficioRepository.count() > 0) return;
+
+        NivelFidelizacion bronce = nivelFidelizacionRepository.findFirstByNombre("Bronce").orElse(null);
+        NivelFidelizacion plata = nivelFidelizacionRepository.findFirstByNombre("Plata").orElse(null);
+        NivelFidelizacion oro = nivelFidelizacionRepository.findFirstByNombre("Oro").orElse(null);
+        NivelFidelizacion diamante = nivelFidelizacionRepository.findFirstByNombre("Diamante").orElse(null);
+
+        if (bronce != null) {
+            crearBeneficio(bronce, "Acumula 5 puntos por cada S/1 en tus compras", "OTRO", "5");
+            crearBeneficio(bronce, "Acceso a promociones generales", "OTRO", null);
+            crearBeneficio(bronce, "Consulta tu historial de puntos y nivel", "OTRO", null);
+        }
+        if (plata != null) {
+            crearBeneficio(plata, "Acumula 8 puntos por cada S/1 en tus compras", "OTRO", "8");
+            crearBeneficio(plata, "Mayor acumulación en promociones seleccionadas", "OTRO", null);
+            crearBeneficio(plata, "Acceso anticipado a promociones especiales", "OTRO", null);
+        }
+        if (oro != null) {
+            crearBeneficio(oro, "Acumula 12 puntos por cada S/1 en tus compras", "OTRO", "12");
+            crearBeneficio(oro, "Descuentos exclusivos en productos seleccionados", "DESCUENTO", null);
+            crearBeneficio(oro, "Promociones especiales por temporada", "OTRO", null);
+            crearBeneficio(oro, "Prioridad en campañas de fidelización", "OTRO", null);
+        }
+        if (diamante != null) {
+            crearBeneficio(diamante, "Acumula 20 puntos por cada S/1 en tus compras", "OTRO", "20");
+            crearBeneficio(diamante, "Beneficios exclusivos para clientes frecuentes", "OTRO", null);
+            crearBeneficio(diamante, "Acceso preferente a promociones limitadas", "OTRO", null);
+            crearBeneficio(diamante, "Recompensas especiales definidas por la administración", "OTRO", null);
+        }
+    }
+
+    private void crearBeneficio(NivelFidelizacion nivel, String descripcion, String tipo, String valor) {
+        Beneficio b = new Beneficio();
+        b.setNivel(nivel);
+        b.setDescripcion(descripcion);
+        b.setTipo(tipo);
+        b.setValor(valor);
+        beneficioRepository.save(b);
     }
 
     private void inicializarFakeClientes() {

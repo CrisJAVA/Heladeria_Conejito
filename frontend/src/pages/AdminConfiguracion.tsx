@@ -10,6 +10,7 @@ import {
   subirImagenMetodoPago,
   type ConfiguracionMetodoPagoDTO,
 } from "../services/configuracionMetodoPago";
+import { listarNiveles, actualizarNivel, type NivelFidelizacionDTO, type BeneficioDTO } from "../services/niveles";
 
 const CONFIG_DEFAULT: ConfiguracionDTO = {
   nombreNegocio: "Heladería Ica",
@@ -49,6 +50,10 @@ export default function AdminConfiguracion() {
   const [guardandoMetodo, setGuardandoMetodo] = useState(false);
   const [subiendoQr, setSubiendoQr] = useState(false);
 
+  const [niveles, setNiveles] = useState<NivelFidelizacionDTO[]>([]);
+  const [nivelEditando, setNivelEditando] = useState<Record<number, NivelFidelizacionDTO>>({});
+  const [guardandoNivel, setGuardandoNivel] = useState<Record<number, boolean>>({});
+
   useEffect(() => {
     obtenerConfiguracion()
       .then((data) => {
@@ -56,7 +61,64 @@ export default function AdminConfiguracion() {
         setLogo(data.logoUrl || "");
       })
       .catch(() => toast.error("Error al cargar la configuración"));
+    cargarNiveles();
   }, []);
+
+  const cargarNiveles = async () => {
+    try {
+      const data = await listarNiveles();
+      setNiveles(data);
+      const editMap: Record<number, NivelFidelizacionDTO> = {};
+      data.forEach((n) => { editMap[n.id] = JSON.parse(JSON.stringify(n)); });
+      setNivelEditando(editMap);
+    } catch {
+      toast.error("Error al cargar niveles");
+    }
+  };
+
+  const actualizarBeneficios = (nivelId: number, beneficios: BeneficioDTO[]) => {
+    setNivelEditando((prev) => ({
+      ...prev,
+      [nivelId]: { ...prev[nivelId], beneficios },
+    }));
+  };
+
+  const agregarBeneficio = (nivelId: number) => {
+    const actual = nivelEditando[nivelId];
+    if (!actual) return;
+    const nuevoBeneficio: BeneficioDTO = { descripcion: "", tipo: "OTRO", valor: "" };
+    actualizarBeneficios(nivelId, [...(actual.beneficios || []), nuevoBeneficio]);
+  };
+
+  const editarBeneficio = (nivelId: number, idx: number, campo: keyof BeneficioDTO, valor: string) => {
+    const actual = nivelEditando[nivelId];
+    if (!actual) return;
+    const beneficios = [...(actual.beneficios || [])];
+    beneficios[idx] = { ...beneficios[idx], [campo]: valor };
+    actualizarBeneficios(nivelId, beneficios);
+  };
+
+  const eliminarBeneficio = (nivelId: number, idx: number) => {
+    const actual = nivelEditando[nivelId];
+    if (!actual) return;
+    const beneficios = (actual.beneficios || []).filter((_, i) => i !== idx);
+    actualizarBeneficios(nivelId, beneficios);
+  };
+
+  const guardarNivel = async (nivelId: number) => {
+    const dto = nivelEditando[nivelId];
+    if (!dto) return;
+    setGuardandoNivel((prev) => ({ ...prev, [nivelId]: true }));
+    try {
+      await actualizarNivel(nivelId, dto);
+      toast.success(`${dto.nombre} actualizado correctamente`);
+      await cargarNiveles();
+    } catch {
+      toast.error(`Error al guardar ${dto.nombre}`);
+    } finally {
+      setGuardandoNivel((prev) => ({ ...prev, [nivelId]: false }));
+    }
+  };
 
   const campo = (key: keyof ConfiguracionDTO) => ({
     value: (config[key] as any) ?? "",
@@ -472,6 +534,101 @@ export default function AdminConfiguracion() {
                   />
                 </div>
               </div>
+            </section>
+
+            <section className="lg:col-span-12 bg-white rounded-2xl p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] space-y-6">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-[#fdd73b]/30 flex items-center justify-center text-[#705d00]">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+                </div>
+                <h3 className="text-[24px] leading-[32px] font-semibold">Niveles y Beneficios</h3>
+              </div>
+              {niveles.length === 0 ? (
+                <p className="text-sm text-gray-400">Cargando niveles...</p>
+              ) : (
+                <div className="space-y-4">
+                  {niveles.map((nivel) => {
+                    const editDto = nivelEditando[nivel.id];
+                    const beneficios = editDto?.beneficios || [];
+                    const guardando = guardandoNivel[nivel.id];
+                    return (
+                      <div key={nivel.id} className="border border-[#dcc0c4] rounded-2xl overflow-hidden">
+                        <div className="flex items-center justify-between px-6 py-4 bg-[#f8f9fa] border-b border-[#dcc0c4]">
+                          <div className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: nivel.colorHex || "#cd7f32" }} />
+                            <div>
+                              <h4 className="text-[18px] leading-[24px] font-bold text-[#191c1d]">{nivel.nombre}</h4>
+                              <p className="text-[12px] text-[#564245]">{nivel.puntosMinimos} pts mínimos &middot; {nivel.puntosPorSoles} pts por S/1</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-6 space-y-3">
+                          {beneficios.length === 0 ? (
+                            <p className="text-sm text-gray-400">Beneficios aún no configurados.</p>
+                          ) : (
+                            beneficios.map((b, idx) => (
+                              <div key={idx} className="flex items-start gap-3 p-3 bg-[#f8f9fa] rounded-xl border border-[#dcc0c4]">
+                                <div className="flex-1 space-y-2 min-w-0">
+                                  <input
+                                    className="w-full h-9 px-3 rounded-lg border border-[#dcc0c4] bg-white focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none text-[13px]"
+                                    type="text"
+                                    placeholder="Descripción del beneficio"
+                                    value={b.descripcion}
+                                    onChange={(e) => editarBeneficio(nivel.id, idx, "descripcion", e.target.value)}
+                                  />
+                                  <div className="flex gap-2">
+                                    <select
+                                      className="h-9 px-3 rounded-lg border border-[#dcc0c4] bg-white text-[12px] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none"
+                                      value={b.tipo || "OTRO"}
+                                      onChange={(e) => editarBeneficio(nivel.id, idx, "tipo", e.target.value)}
+                                    >
+                                      <option value="OTRO">General</option>
+                                      <option value="DESCUENTO">Descuento</option>
+                                      <option value="PRODUCTO_GRATIS">Producto gratis</option>
+                                      <option value="ENVIO_GRATIS">Envío gratis</option>
+                                      <option value="EVENTO">Evento</option>
+                                    </select>
+                                    <input
+                                      className="h-9 px-3 rounded-lg border border-[#dcc0c4] bg-white text-[12px] focus:border-[#a43756] focus:ring-2 focus:ring-[#a43756]/20 transition-all outline-none w-24"
+                                      type="text"
+                                      placeholder="Valor"
+                                      value={b.valor || ""}
+                                      onChange={(e) => editarBeneficio(nivel.id, idx, "valor", e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => eliminarBeneficio(nivel.id, idx)}
+                                  className="text-[#ba1a1a] hover:bg-[#ffdad6] p-2 rounded-lg transition-all flex-shrink-0"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                              </div>
+                            ))
+                          )}
+                          <div className="flex gap-3 pt-2">
+                            <button
+                              onClick={() => agregarBeneficio(nivel.id)}
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-[#897175] text-[#a43756] font-bold hover:bg-[#edeeef] transition-all text-sm"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">add</span>
+                              Agregar beneficio
+                            </button>
+                            <button
+                              onClick={() => guardarNivel(nivel.id)}
+                              disabled={guardando}
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#ff7e9d] text-[#761235] font-bold hover:brightness-105 active:scale-95 transition-all text-sm disabled:opacity-60"
+                            >
+                              <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
+                              {guardando ? "Guardando..." : "Guardar cambios"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
 
             <div className="lg:col-span-12 flex justify-start pb-8">
