@@ -89,6 +89,10 @@ public class PuntosService {
         List<NivelFidelizacion> niveles = nivelFidelizacionRepository.findAllByOrderByPuntosMinimosAsc();
 
         PuntosDTO dto = new PuntosDTO();
+        dto.setAfiliado(puntos != null);
+        if (puntos != null) {
+            dto.setId(puntos.getId());
+        }
         int acumulados = puntos != null ? puntos.getPuntosAcumulados() : 0;
         dto.setPuntosActuales(puntos != null ? puntos.getPuntosActuales() : 0);
         dto.setPuntosAcumulados(acumulados);
@@ -111,6 +115,15 @@ public class PuntosService {
         if (siguienteNivel != null) {
             dto.setNivelSiguiente(siguienteNivel.getNombre());
             dto.setPuntosSiguiente(siguienteNivel.getPuntosMinimos());
+            int currentMin = nivelActual != null ? nivelActual.getPuntosMinimos() : 0;
+            int range = siguienteNivel.getPuntosMinimos() - currentMin;
+            int progress = acumulados - currentMin;
+            dto.setPorcentajeProgreso(range > 0 ? Math.min(100, (int) (((double) progress / range) * 100)) : 100);
+            dto.setPuntosFaltantes(Math.max(0, siguienteNivel.getPuntosMinimos() - acumulados));
+        } else {
+            dto.setPuntosSiguiente(0);
+            dto.setPuntosFaltantes(0);
+            dto.setPorcentajeProgreso(100);
         }
 
         return dto;

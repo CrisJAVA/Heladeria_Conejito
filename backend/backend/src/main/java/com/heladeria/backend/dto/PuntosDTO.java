@@ -9,6 +9,8 @@ public class PuntosDTO {
     private String nivelColor;
     private String nivelSiguiente;
     private int puntosSiguiente;
+    private int puntosFaltantes;
+    private int porcentajeProgreso;
     private boolean afiliado;
 
     public PuntosDTO() {}
@@ -29,4 +31,8 @@ public class PuntosDTO {
     public void setPuntosSiguiente(int puntosSiguiente) { this.puntosSiguiente = puntosSiguiente; }
     public boolean isAfiliado() { return afiliado; }
     public void setAfiliado(boolean afiliado) { this.afiliado = afiliado; }
+    public int getPuntosFaltantes() { return puntosFaltantes; }
+    public void setPuntosFaltantes(int puntosFaltantes) { this.puntosFaltantes = puntosFaltantes; }
+    public int getPorcentajeProgreso() { return porcentajeProgreso; }
+    public void setPorcentajeProgreso(int porcentajeProgreso) { this.porcentajeProgreso = porcentajeProgreso; }
 }

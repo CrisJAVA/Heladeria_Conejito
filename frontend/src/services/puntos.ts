@@ -6,6 +6,10 @@ export interface MisPuntos {
   puntosAcumulados: number;
   nivel: string | null;
   nivelColor: string | null;
+  nivelSiguiente: string | null;
+  puntosSiguiente: number;
+  puntosFaltantes: number;
+  porcentajeProgreso: number;
   afiliado: boolean;
 }
 

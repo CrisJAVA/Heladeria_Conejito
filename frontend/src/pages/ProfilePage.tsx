@@ -2,39 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, User, Mail, Phone, MapPin, Lock, Eye, EyeOff, Save, Star,
-  Trophy, Gift, IceCream,
+  Trophy, Gift,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getPerfil, cambiarPassword } from "../services/auth";
 import { listarMisPedidos, type PedidoResponse } from "../services/pedidos";
 import { obtenerMisPuntos, afiliarse as afiliarsePuntos, type MisPuntos } from "../services/puntos";
+import { listarNiveles, type NivelFidelizacionDTO } from "../services/niveles";
 import { toast } from "sonner";
 import Footer from "../app/components/Footer";
 
-const levels = [
-  { name: "Bronce", pts: 0, color: "#cd7f32" },
-  { name: "Plata", pts: 100, color: "#c0c0c0" },
-  { name: "Oro", pts: 300, color: "#ffd700" },
-  { name: "Diamante", pts: 600, color: "#b9f2ff" },
-];
 
-const rewards = [
-  { name: "Helado Simple", pts: 50, icon: IceCream },
-  { name: "Helado Doble", pts: 100, icon: IceCream },
-  { name: "S/ 5 Descuento", pts: 150, icon: Gift },
-  { name: "Pizza Personal", pts: 250, icon: Gift },
-  { name: "S/ 15 Descuento", pts: 400, icon: Gift },
-  { name: "Combo Familiar", pts: 600, icon: Gift },
-];
-
-function getNextLevel(puntos: number, nivel: string | null) {
-  for (let i = 0; i < levels.length; i++) {
-    if (levels[i].name === nivel && i + 1 < levels.length) {
-      return levels[i + 1];
-    }
-  }
-  return null;
-}
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -47,7 +25,12 @@ export default function ProfilePage() {
 
   const [orders, setOrders] = useState<PedidoResponse[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [niveles, setNiveles] = useState<NivelFidelizacionDTO[]>([]);
   const [misPuntos, setMisPuntos] = useState<MisPuntos | null>(null);
+
+  useEffect(() => {
+    listarNiveles().then(setNiveles).catch(() => setNiveles([]));
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -248,7 +231,7 @@ export default function ProfilePage() {
                 <span className="text-sm text-gray-500">Nivel:</span>
                 <span
                   className="px-4 py-1.5 rounded-full text-sm font-bold text-white"
-                  style={{ backgroundColor: levels.find((l) => l.name === misPuntos.nivel)?.color || "#cd7f32" }}
+                  style={{ backgroundColor: misPuntos.nivelColor || "#cd7f32" }}
                 >
                   {misPuntos.nivel || "Bronce"}
                 </span>
@@ -262,57 +245,48 @@ export default function ProfilePage() {
                 {misPuntos.puntosAcumulados.toLocaleString()} pts acumulados en total
               </p>
 
-              <div className="bg-gray-50 rounded-2xl p-5 mb-5">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500">Progreso al siguiente nivel</span>
-                  <span className="font-medium text-[#2d2d2d]">
-                    {(() => {
-                      const next = getNextLevel(misPuntos.puntosAcumulados, misPuntos.nivel);
-                      return next
-                        ? `${misPuntos.puntosAcumulados} / ${next.pts} pts`
-                        : "¡Nivel máximo!";
-                    })()}
-                  </span>
-                </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#ff6b9d] to-[#ffd93d] rounded-full transition-all duration-700"
-                    style={{
-                      width: `${(() => {
-                        const next = getNextLevel(misPuntos.puntosAcumulados, misPuntos.nivel);
-                        return next ? Math.min((misPuntos.puntosAcumulados / next.pts) * 100, 100) : 100;
-                      })()}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-400 mt-2">
-                  {(() => {
-                    const next = getNextLevel(misPuntos.puntosAcumulados, misPuntos.nivel);
-                    return next
-                      ? `Te faltan ${next.pts - misPuntos.puntosAcumulados} pts para llegar a ${next.name}`
-                      : "Has alcanzado el nivel más alto";
-                  })()}
-                </p>
-              </div>
-
-              <h4 className="font-bold text-sm text-gray-700 mb-3">Recompensas disponibles</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {rewards.map((r) => {
-                  const canAfford = misPuntos.puntosActuales >= r.pts;
-                  return (
+              {misPuntos.nivelSiguiente ? (
+                <div className="bg-gray-50 rounded-2xl p-5 mb-5">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Progreso a {misPuntos.nivelSiguiente}</span>
+                    <span className="font-medium text-[#2d2d2d]">
+                      {misPuntos.puntosFaltantes > 0
+                        ? `Faltan ${misPuntos.puntosFaltantes} pts`
+                        : "¡Listo para subir!"}
+                    </span>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={misPuntos.porcentajeProgreso} aria-valuemin={0} aria-valuemax={100} aria-label={`Progreso a ${misPuntos.nivelSiguiente}`}>
                     <div
-                      key={r.name}
-                      className={`rounded-xl p-4 text-center border ${canAfford ? "border-[#ffd93d] bg-[#fffef5]" : "border-gray-100 bg-gray-50/50"} transition-all`}
-                    >
-                      <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${canAfford ? "bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d]" : "bg-gray-200"}`}>
-                        <r.icon className={`w-5 h-5 ${canAfford ? "text-white" : "text-gray-400"}`} />
+                      className="h-full bg-gradient-to-r from-[#ff6b9d] to-[#ffd93d] rounded-full transition-all duration-700"
+                      style={{ width: `${misPuntos.porcentajeProgreso}%` }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-2xl p-5 mb-5 text-center">
+                  <Trophy className="w-6 h-6 text-[#ffd93d] mx-auto mb-1" />
+                  <p className="text-sm font-bold text-[#2d2d2d]">¡Has alcanzado el nivel máximo!</p>
+                </div>
+              )}
+
+              <h4 className="font-bold text-sm text-gray-700 mb-3">Beneficios de tu nivel</h4>
+              {(() => {
+                const nivelActual = niveles.find((n) => n.nombre === misPuntos.nivel);
+                const beneficios = nivelActual?.beneficios || [];
+                if (beneficios.length === 0) return <p className="text-sm text-gray-400">No hay beneficios configurados</p>;
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {beneficios.map((b) => (
+                      <div key={b.id} className="rounded-xl p-4 text-center border border-gray-100 bg-gray-50/50">
+                        <div className="w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center bg-gradient-to-br from-[#ff6b9d] to-[#ffd93d]">
+                          <Gift className="w-5 h-5 text-white" />
+                        </div>
+                        <p className="text-xs font-bold text-[#2d2d2d]">{b.descripcion}</p>
                       </div>
-                      <p className={`text-xs font-bold ${canAfford ? "text-[#2d2d2d]" : "text-gray-400"}`}>{r.name}</p>
-                      <p className={`text-[10px] ${canAfford ? "text-[#ff6b9d]" : "text-gray-300"}`}>{r.pts} pts</p>
-                    </div>
-                  );
-                })}
-              </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </>
           ) : (
             <div className="text-center py-8">

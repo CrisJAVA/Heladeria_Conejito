@@ -255,10 +255,10 @@ INSERT INTO metodo_pago (nombre, icono) VALUES
 
 -- Niveles de fidelización
 INSERT INTO nivel_fidelizacion (nombre, puntos_minimos, puntos_por_soles, color_hex) VALUES
-('Bronce', 0, 5, '#d97706'),
-('Plata', 501, 10, '#94a3b8'),
-('Oro', 1501, 15, '#eab308'),
-('Diamante', 3001, 20, '#06b6d4');
+('Bronce', 0, 5, '#cd7f32'),
+('Plata', 100, 8, '#c0c0c0'),
+('Oro', 300, 12, '#ffd700'),
+('Diamante', 600, 20, '#b9f2ff');
 
 -- Beneficios por nivel
 INSERT INTO beneficio (nivel_id, descripcion, tipo, valor) VALUES
@@ -270,13 +270,13 @@ INSERT INTO beneficio (nivel_id, descripcion, tipo, valor) VALUES
 (2, '2 helados gratis al mes', 'PRODUCTO_GRATIS', '2'),
 (2, '1 topping gratis por pedido', 'PRODUCTO_GRATIS', '1'),
 (2, 'Prioridad en atención presencial', 'OTRO', NULL),
-(2, 'Acumula 10 puntos por cada S/ 1', 'OTRO', '10'),
+(2, 'Acumula 8 puntos por cada S/ 1', 'OTRO', '8'),
 (3, '15% de descuento en tu compra', 'DESCUENTO', '15'),
 (3, '3 helados gratis al mes', 'PRODUCTO_GRATIS', '3'),
 (3, '1 bebida gratis por pedido', 'PRODUCTO_GRATIS', '1'),
 (3, 'Envío delivery gratuito', 'ENVIO_GRATIS', NULL),
 (3, 'Invitación a lanzamientos de sabores', 'EVENTO', NULL),
-(3, 'Acumula 15 puntos por cada S/ 1', 'OTRO', '15'),
+(3, 'Acumula 12 puntos por cada S/ 1', 'OTRO', '12'),
 (4, '20% de descuento en tu compra', 'DESCUENTO', '20'),
 (4, '5 helados gratis al mes', 'PRODUCTO_GRATIS', '5'),
 (4, '1 pizza personal gratis al mes', 'PRODUCTO_GRATIS', '1'),
