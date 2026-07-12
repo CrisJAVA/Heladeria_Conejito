@@ -35,8 +35,5 @@ build/
 # H2 Database (evitar commits de archivos binarios)
 database/data/
 
-# Configuración local (contiene credenciales)
-src/main/resources/application.properties
-
 # Logs
 *.log

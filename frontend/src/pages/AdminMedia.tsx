@@ -78,7 +78,9 @@ export default function AdminMedia() {
   };
 
   const copyUrl = (url: string) => {
-    navigator.clipboard.writeText(`http://localhost:8080${url}`);
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+    const apiPrefix = baseUrl.replace(/\/api\/?$/, "");
+    navigator.clipboard.writeText(`${apiPrefix}${url}`);
     toast.success("URL copiada");
   };
 
@@ -190,7 +192,7 @@ export default function AdminMedia() {
                     className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all"
                   >
                     <div className="aspect-square overflow-hidden cursor-pointer" onClick={() => setSelected(selected === img.filename ? null : img.filename)}>
-                      <img src={`http://localhost:8080${img.url}`} alt={img.filename}
+                      <img src={img.url} alt={img.filename}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
@@ -229,7 +231,7 @@ export default function AdminMedia() {
               className="bg-white rounded-3xl overflow-hidden max-w-3xl w-full max-h-[90vh] shadow-2xl"
             >
               <div className="relative">
-                <img src={`http://localhost:8080${selected}`} alt="Vista previa" className="w-full max-h-[70vh] object-contain bg-gray-100" />
+                <img src={selected} alt="Vista previa" className="w-full max-h-[70vh] object-contain bg-gray-100" />
                 <button onClick={() => setSelected(null)}
                   className="absolute top-3 right-3 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
                 >

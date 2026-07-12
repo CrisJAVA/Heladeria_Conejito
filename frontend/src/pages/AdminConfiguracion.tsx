@@ -65,7 +65,9 @@ export default function AdminConfiguracion() {
     setSubiendoLogo(true);
     try {
       const { url } = await subirImagen(file);
-      const fullUrl = url.startsWith("http") ? url : `http://localhost:8080${url}`;
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const apiPrefix = baseUrl.replace(/\/api\/?$/, "");
+      const fullUrl = url.startsWith("http") ? url : `${apiPrefix}${url}`;
       const actualizado = await actualizarConfiguracion({ ...config, logoUrl: fullUrl });
       setConfig(actualizado);
       toast.success("Logo actualizado correctamente");

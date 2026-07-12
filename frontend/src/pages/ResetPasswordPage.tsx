@@ -4,7 +4,7 @@ import { IceCream, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Footer from "../app/components/Footer";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();

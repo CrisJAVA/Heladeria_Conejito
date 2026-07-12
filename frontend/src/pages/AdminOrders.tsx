@@ -6,7 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { listarPedidos, actualizarEstadoPedido, type PedidoResponse } from "../services/pedidos";
 import { obtenerConfiguracion, type ConfiguracionDTO } from "../services/configuracion";
 
-const WS_URL = "ws://localhost:8080/ws/pedidos";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const WS_URL = API_BASE.replace(/^http/, "ws").replace(/\/api\/?$/, "") + "/ws/pedidos";
 
 const estadoColors: Record<string, string> = {
   PENDIENTE: "bg-[#e7e8e9] text-[#564245]",
